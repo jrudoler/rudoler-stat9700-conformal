@@ -30,30 +30,30 @@
 
 \abstract{
     \footnotesize
-    Conformal prediction is a model-agnostic framework for constructing valid prediction intervals and hypothesis tests without making any assumptions about the underlying data
+    Conformal prediction is a model-agnostic framework for constructing valid prediction sets (and corresponding hypothesis tests) without making any assumptions about the underlying data
     distribution.
     As modern machine learning systems continue to scale in both size and complexity,
     the ability to make valid predictions without making assumptions about the training data or model is becoming increasingly important. In particular, the success and ubiquity
     of deep and over-parameterized neural networks has led to a growing interest in
     techniques that can provide statistically rigorous uncertainty quantification for models that are effectively a ``black box''.
-    In this report, we will provide an overview of the conformal inference framework
-    and some important results, discuss some extensions and applications of conformal inference,
-    and finally discuss some potential avenues for future research.
+    In this report, we will provide an overview of the conformal inference framework and some important results, discuss some extensions and demonstrate an application of conformal inference in a natural language processing setting.
 }
 
 \section*{Introduction}
-Conformal inference (also known as conformal prediction) was first introduced by \textcite{vovkMachineLearningApplicationsAlgorithmic1999}
+Conformal prediction (also known as conformal inference) was first introduced by \textcite{vovkMachineLearningApplicationsAlgorithmic1999} and has seen a surge of interest within the last decade. Contributing to this increased interest is the growing popularity of machine learning models which are effectively ``black boxes'' - that is, models which have so many parameters and such flexible architectures that it is nearly impossible do inference on their learned parameters. Deep neural networks with millions or billions of parameters are now ubiquitous in important tasks in computer vision, natural language processing, and reinforcement learning. These models are for safety-critical applications like medical diagnosis or autonomous driving, making uncertainty quantification paramount for their deployment.
 
-\section*{Foundations}
+Conformal prediction provides a framework for constructing prediction sets (in continuous settings like regression, prediction intervals) with rigorous coverage guarantees for \textit{any} model at test time. The only assumption required is that the data are exchangeable, and we will see examples later of how this assumption can be relaxed.
+
+This report is organized as follows: We will begin with an overview of the conformal prediction framework and some important results, then briefly summarize some key extensions, and finally provide an example application of conformal prediction to text classification with a large language model.
+
+\section{Foundations}
 This section will begin with a discussion of some conformal prediction basics,
 loosely following~\cite{angelopoulosGentleIntroductionConformal2022}.
 This will include an abbreviated proof of the validity of conformal prediction sets for exchangeable data,
 and an overview of some important applications and extensions of conformal prediction.
-Next, we will discuss in more detail how conformal prediction can be married to
-kernel density estimation to obtain prediction sets with asymptotic efficiency
-guarantees \autocite{leiDistributionFreePrediction2013}. We will also discuss
-how conformal prediction can be used in a cross-validation setting to obtain confidence
-intervals with rigorous coverage guarantees \autocite{barberPredictiveInferenceJackknife2020}.
+We will then discuss how conformal prediction can be used in a cross-validation setting to obtain confidence intervals with rigorous coverage guarantees \autocite{barberPredictiveInferenceJackknife2020}.
+Next, we will discuss in more detail how conformal prediction can be married to kernel density estimation to obtain prediction sets with asymptotic efficiency
+guarantees \autocite{leiDistributionFreePrediction2013}.
 Finally, we will see what happens when we try to apply conformal prediction to
 non-exchangeable data \autocite{barberConformalPredictionExchangeability2023}.
 
@@ -145,15 +145,32 @@ And the prediction set becomes:
 Intuitively, this is testing if the the new observation $(X_{n+1}, y)$ is exchangeable with all of the other observations, under the null hypothesis that $y$ is the true label for $X_{n+1}$.
 The next section discusses a connection between full conformal prediction and kernel density estimation which allows us to obtain prediction sets with asymptotic efficiency guarantees.
 
-\subsection*{Kernel Density Estimation}
+\subsection*{Holdout methods: Jackknife+ and CV+}
+To avoid overfitting, it is common to train a model on a partial dataset and reserve the remaining observation as a holdout for validation (or test). Split conformal prediction, as described above, is an example of a method with a single holdout - the conformal procedure is calibrated on part of the data and then applied to the remaining holdout data. (Actually, in practice there is a third set of data - the training data - which is used to fit the model, but not used in the conformal procedure.)
+
+\textcite{barberPredictiveInferenceJackknife2020} discuss the application of conformal prediction to iterative holdout methods, which are a popular approach to uncertainty quantification in machine learning.\\
+
+Before proceeding, we define some added notation. Take $\hat{q}^+\{\cdot \}$ is the $\frac{\lceil (n+1)(1-\alpha) \rceil }{n}$ quantile, and $\hat{q}^-\{\cdot \}$ is the $\frac{\lfloor (n+1)\alpha \rfloor }{n}$ quantile. We will also use the notation $\hat{f}_{-i}(X_i)$ to denote the model fit to the full dataset without the $i$th observation.
+
+The original jackknife method involves fitting a model to the full dataset, and then generating an empirical distribution of test residuals obtained by computing the for each observation from a model fit to the full dataset without that observation. We can use the quantiles of this distribution to construct a confidence region. Specifically, we can define a prediction set for a new observation $X_{n+1}$ as:
+\[ \hat{C}^{JK}(X_{n+1}) = \hat{f}(X_{n+1}) \pm \hat{q}\{ |Y_i - \hat{f}_{-i}(X_i)|\} \]
+Or, equivalenty:
+\[ \hat{C}^{JK}(X_{n+1}) = \left[ \hat{q}^{-}\left\{ \hat{f}(X_{n+1}) - |Y_i - \hat{f}_{-i}(X_i)|\right\}, \hat{q}^{+}\left\{ \hat{f}(X_{n+1}) + |Y_i - \hat{f}_{-i}(X_i)|\right\} \right] \]
+While this procedure has been shown to provide good empirical coverage, it is not valid in general - only in the case where the model meets certain stability criteria \autocite{steinbergerConditionalPredictiveInference2022}.
+
+\textcite{barberPredictiveInferenceJackknife2020} propose a conformalized version of the jackknife method, which they call Jackknife+. In particular, they define the prediction set for a new observation $X_{n+1}$ as:
+\[ \hat{C}^{JK+}(X_{n+1}) = \left[ \hat{q}^{-}\left\{ \hat{f}_{-i}(X_{n+1}) - |Y_i - \hat{f}_{-i}(X_i)|\right\}, \hat{q}^{+}\left\{ \hat{f}_{-i}(X_{n+1}) + |Y_i - \hat{f}_{-i}(X_i)|\right\} \right] \]
+
+The key difference here is that the test point for $X_{n+1}$ is variable, since it is produced by the iterative model fits excluding observation $i$. So, instead of getting a symmetric interval around $\hat{f}(X_{n+1})$, we get an interval about the median of $\{\hat{f}_{-i}(X_{n+1})\}$ which is not symmetric in general.
+
+\subsection*{Density estimation}
 Generating conformalized prediction sets can be cast as a problem of estimating
 density level sets for an unknown probability distribution \autocite{leiDistributionFreePrediction2013}.
 Consider a sequence of i.i.d. data drawn from some unknown distribution with density $p(y)$.
 If we want to find a set $C$ for a new observation such that
 $\P(Y \in C) \geq 1 - \alpha$, this is equivalent to finding an estimated density level set
 $$L(t_\alpha)=C_\alpha=\{y: \hat{p}(y) \geq t_\alpha\} \quad \text{where} \quad t_\alpha = \inf \{t: \P(Y \in L(t)) \geq 1 - \alpha\}$$
-We will deal with the more general setting in this section (following the original paper), but it is worth noting that in typical machine learning applications, we will actually be interested in finding a set $C(X)$ such that the
-conditional probability $\P(Y \in C(X) | X) \geq 1 - \alpha$ and the density we want to estimate is $p_{Y|X}(x, y)$.\\
+We will deal with this more general notation in this section (following the original paper), but it is worth noting that in typical machine learning applications we deal with a model that predicts $Y$ based on some features $X$. The goal is then using that model's predictions to find a set $C(X)$ such that the probability $\P(Y \in C(X) ) \geq 1 - \alpha$.\\
 Note that if $\hat{p}(y)$ were estimated perfectly, we would have no need to conformalize the density level set --
 we would simply greedily add the most likely observations to the set until we reached the desired coverage.
 However, in practice we will need to estimate $\hat{p}(y)$ from a finite sample
@@ -180,12 +197,9 @@ It is worth noting as well that while the asymptotic efficiency of the kernel de
 
 \paragraph*{Conformalized Bayes.} Before moving on to the next section, we will mention that framing conformal prediction as a density level set estimation problem also connects nicely to Bayesian inference. In particular, we can choose the conformal score function to be the posterior predictive density of the label given the data, and the prediction set will be the density level set with coverage guarantee $1-\alpha$. ``Conformalized Bayes'' allows us to obtain valid prediction sets for Bayesian models without making any assumptions about the correctness of the model or the data distribution - in this sense it mitigates concerns about misspecified priors. \textcite{hoffBayesoptimalPredictionFrequentist2021} shows that under certain conditions, this procedure is Bayes optimal (in the sense that it minimizes the Bayes risk among all valid prediction sets).
 
-\subsection*{Jackknife Conformal Prediction}
-As in \cite{barberPredictiveInferenceJackknife2020}.
+\subsection*{Beyond exchangeability}
 
-
-
-\section*{Extensions and related work}
+\section{Extensions and related work}
 In this section, we further discuss two crucial extensions of conformal inference
 to settings with non-exchangeable data \autocite{gibbsAdaptiveConformalInference2021, tibshiraniConformalPredictionCovariate2020}.
 We will also discuss some related work on uncertainty quantification for deep neural networks that lies outside the conformal inference framework
@@ -194,25 +208,38 @@ We will also discuss some related work on uncertainty quantification for deep ne
 See \autocite{angelopoulosLearnThenTest2022}. \\
 Maybe go more specifically into conformal language modeling \autocite{quachConformalLanguageModeling2023}.
 
-\section*{Application: Adaptive Conformal Prediction for Text Classification}
+\section{Application: Adaptive Conformal Prediction for Text Classification}
 In this section, we will provide a case study of how conformal prediction can be used to obtain
 prediction sets with rigorous coverage guarantees for text classification with a large language model (LLM). We will
-compare the naive conformal prediction procedure with the adaptive conformal prediction procedure, and show that the
-adaptive procedure can result in prediction sets which are much smaller. Moreover, we will show that the adaptive procedure actually satisfies a stronger guarantee of \textit{conditional coverage} as opposed to the \textit{marginal coverage}.
+compare a naive conformal prediction procedure with an adaptive conformal prediction procedure, and show that the
+adaptive score can lead to smaller prediction sets while preserving valid coverage.
 
-\subsection*{Methods}
-\subsection*{Model and data}
-We classify text with the transformer-based language model BART \autocite{lewisBARTDenoisingSequencetoSequence2019},
+\paragraph*{Model.} We classify text with the transformer-based language model BART \autocite{lewisBARTDenoisingSequencetoSequence2019},
 finetuned on the Multi-Genre Natural Language Inference (MNLI) categorized text corpus \footnote{\url{https://huggingface.co/datasets/multi_nli}},
-as proposed by \textcite{yinBenchmarkingZeroshotText2019} for zero-shot text classification. We use the HuggingFace implementation of \texttt{bart-large-mnli}\footnote{\url{https://huggingface.co/facebook/bart-large-mnli}}, and set up a zero-shot text classification pipeline with the \texttt{transformers} library \autocite{wolfHuggingFaceTransformersStateoftheart2019}.
+as proposed by \textcite{yinBenchmarkingZeroshotText2019} for zero-shot text classification. The approach is to treat the task of text classification as a natural language inference (NLI) task, where the premise is the text to be classified and the hypothesis is a statement about the label like ``This text is about politics''. The model computes the probability that the hypothesis is true given the premise, and we repeat this for each label independently.
+
 We note that this model is no longer state of the art, but it is more lightweight (400 million parameters) than the larger and more performant models which have gained prominence (e.g. Meta's Llama2 models range from 7-70 billion parameters), and therefore more suitable for fast inference on a laptop.
 Since we are interested in demonstrating the utility of conformal prediction, we do not need to use the most powerful model available.
 We will see that this model results in prediction sets which are fairly large, and it is likely that a more powerful model would result give us better heuristic uncertainty estimates and therefore smaller prediction sets.
 
 
-Our prediction task is to classify text from a new data source, a Kaggle dataset of text documents belonging to 5 new categories\footnote{\url{https://www.kaggle.com/datasets/sunilthite/text-document-classification-dataset/data}}. These categories -- Politics, Sport, Technology, Entertainment, and Business -- are mostly nonoverlapping with the categories in the MNLI corpus. The one exception being Politics, which is similar to the Government genre in MNLI -- we will see that this category is, unsurprisingly, the easiest to classify. Of course, BART's original training data surely contained text related to all of these genres, but it was not specifically trained to classify them.
+\paragraph*{Data.} Our prediction task is to classify text from a new data source, a Kaggle dataset of text documents belonging to 5 new categories\footnote{\url{https://www.kaggle.com/datasets/sunilthite/text-document-classification-dataset/data}}. These categories -- Politics, Sport, Technology, Entertainment, and Business -- are mostly nonoverlapping with the categories in the MNLI corpus. The one exception being Politics, which is similar to the Government genre in MNLI -- we will see that this category is, unsurprisingly, the easiest to classify. Of course, BART's original training data surely contained text related to all of these genres (which is why we expect it have enough knowledge to be capable of zero-shot classification), but it was not specifically trained to classify them. We split this Kaggle dataset, using half the data for calibration and the other half for testing.
 
-\
+\paragraph*{Code} All the code for this project is available at \url{https://github.com/jrudoler/rudoler-stat9700-conformal}. This includes the code for language model inference, conformal prediction, and the code used to generate the figures in this report. We use the HuggingFace implementation of \texttt{bart-large-mnli}\footnote{\url{https://huggingface.co/facebook/bart-large-mnli}}, and set up a zero-shot text classification pipeline with the \texttt{transformers} library \autocite{wolfHuggingFaceTransformersStateoftheart2019}.
+
+\subsubsection*{Conformal scores}
+We will compare two different choices of score function $s$ for the conformal prediction procedure:
+\begin{enumerate}
+    \item \textbf{Nonadaptive}: We just use the predicted probability of each label independently to compute the score. That is, for a given text document $X$, we compute the score \[s(X, y) = 1 - \hat{f}(X)_y \] for each label $y$.
+    \item \textbf{Adaptive}: We consider the predicted probability of all labels simultaneously in computing the score. Specifically we reorder the labels by descending probability, such that $\hat{f}(X)_{(1)}$ is the most likely label, $\hat{f}(X)_{(2)}$ is the second most likely label, and so on. We define $k$ such that $\hat{f}(X)_{(k)} = y$, and compute the score: \[ s(X, y) = \sum_{j=1}^{k} \hat{f}(X)_{(j)} \] Basically, we add up the predicted probabilities of all the labels in descending order up to and including the true label, $y$.
+\end{enumerate}
+
+\textcite{angelopoulosUncertaintySetsImage2022} discuss adaptive prediction sets in detail in the context of image classification, and introduce the adaptive score function we use here.
+
+\paragraph*{Results} We evaluate the prediction sets produced via conformal prediction with each of the two score functions described above. Figure \ref{fig:coverage} shows the overall coverage of the prediction sets for each score function, as well as the conditional coverage for each category. Figure \ref{fig:set_size} shows the average size of the prediction sets for each score function, again both overall and for each category.
+
+
+
 
 
 
@@ -231,8 +258,8 @@ Our prediction task is to classify text from a new data source, a Kaggle dataset
         \caption{Adaptive conformal prediction}
         \label{fig:adaptive_coverage}
     \end{subfigure}
-    \caption{Comparison of coverage for nonadaptive and adaptive conformal prediction for text classification. While both procedures have marginal coverage guarantees of $1-\alpha$, the adaptive procedure has conditional coverage guarantees of $1-\alpha$ for all groups. The nonadaptive procedure undercovers for some groups and overcovers for others.}
-    \label{fig:conformal_prediction}
+    \caption{Comparison of coverage for nonadaptive and adaptive conformal prediction for text classification. Both procedures have marginal coverage guarantees of $1-\alpha$. }
+    \label{fig:coverage}
 \end{figure}
 
 % include vertically stacked subfigures for set size
@@ -248,8 +275,8 @@ Our prediction task is to classify text from a new data source, a Kaggle dataset
         \caption{Adaptive conformal prediction}
         \label{fig:adaptive_set_size}
     \end{subfigure}
-    \caption{Comparison of set size for nonadaptive and adaptive conformal prediction for text classification. The adaptive procedure guarantees coverage for the hardest groups by making larger prediction sets for those groups.}
-    \label{fig:conformal_prediction}
+    \caption{Comparison of set size for nonadaptive and adaptive conformal prediction for text classification. The adaptive procedure improves coverage for the hardest categories by making their prediction sets larger.}
+    \label{fig:set_size}
 \end{figure}
 
 
