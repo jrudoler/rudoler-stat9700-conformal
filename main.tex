@@ -200,7 +200,8 @@ prediction sets with rigorous coverage guarantees for text classification with a
 compare the naive conformal prediction procedure with the adaptive conformal prediction procedure, and show that the
 adaptive procedure can result in prediction sets which are much smaller. Moreover, we will show that the adaptive procedure actually satisfies a stronger guarantee of \textit{conditional coverage} as opposed to the \textit{marginal coverage}.
 
-\subsection*{Data and model}
+\subsection*{Methods}
+\subsection*{Model and data}
 We classify text with the transformer-based language model BART \autocite{lewisBARTDenoisingSequencetoSequence2019},
 finetuned on the Multi-Genre Natural Language Inference (MNLI) categorized text corpus \footnote{\url{https://huggingface.co/datasets/multi_nli}},
 as proposed by \textcite{yinBenchmarkingZeroshotText2019} for zero-shot text classification. We use the HuggingFace implementation of \texttt{bart-large-mnli}\footnote{\url{https://huggingface.co/facebook/bart-large-mnli}}, and set up a zero-shot text classification pipeline with the \texttt{transformers} library \autocite{wolfHuggingFaceTransformersStateoftheart2019}.
@@ -208,7 +209,10 @@ We note that this model is no longer state of the art, but it is more lightweigh
 Since we are interested in demonstrating the utility of conformal prediction, we do not need to use the most powerful model available.
 We will see that this model results in prediction sets which are fairly large, and it is likely that a more powerful model would result give us better heuristic uncertainty estimates and therefore smaller prediction sets.
 
+
 Our prediction task is to classify text from a new data source, a Kaggle dataset of text documents belonging to 5 new categories\footnote{\url{https://www.kaggle.com/datasets/sunilthite/text-document-classification-dataset/data}}. These categories -- Politics, Sport, Technology, Entertainment, and Business -- are mostly nonoverlapping with the categories in the MNLI corpus. The one exception being Politics, which is similar to the Government genre in MNLI -- we will see that this category is, unsurprisingly, the easiest to classify. Of course, BART's original training data surely contained text related to all of these genres, but it was not specifically trained to classify them.
+
+\
 
 
 
