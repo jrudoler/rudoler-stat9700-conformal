@@ -1,0 +1,20 @@
+\usepackage[backend=biber, style=apa]{biblatex} % for bibliography management
+
+% Define shorthand commands
+\newcommand{\R}{\mathbb{R}} % shorthand for real numbers
+\newcommand{\N}{\mathbb{N}} % shorthand for natural numbers
+\newcommand{\Z}{\mathbb{Z}} % shorthand for integers
+\newcommand{\Q}{\mathbb{Q}} % shorthand for rational numbers
+\newcommand{\C}{\mathbb{C}} % shorthand for complex numbers
+\renewcommand{\P}{\mathbb{P}} % shorthand for probability
+\newcommand{\E}{\mathbb{E}} % shorthand for expectation
+
+% Specify biblatex settings
+\DeclareFieldFormat{title}{\mkbibemph{#1}} % format the title of the references in italics
+\DeclareFieldFormat[article]{title}{#1} % format the title of articles normally
+\DeclareFieldFormat[book]{title}{#1} % format the title of books normally
+\DeclareFieldFormat[inproceedings]{title}{#1} % format the title of conference proceedings normally
+
+% Other custom settings can be added here
+% 1-inch margins on all sides and less space for the header
+\usepackage[margin=1in,headheight=5pt]{geometry}
