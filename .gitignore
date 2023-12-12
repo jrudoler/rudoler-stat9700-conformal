@@ -20,6 +20,17 @@
 *.tar
 *.zip
 
+# Latex #
+############
+*.aux
+*.bbl
+*.blg
+*.bcf
+*.fdb_latexmk
+*.fls
+*.out
+*.run.xml
+
 # Logs and databases #
 ######################
 *.log
