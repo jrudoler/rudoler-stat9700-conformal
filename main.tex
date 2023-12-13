@@ -63,9 +63,9 @@ non-exchangeable data \autocite{barberConformalPredictionExchangeability2023}.
 \label{sec:basics}
 The central goal of conformal prediction is to construct prediction sets which have coverage guarantees at
 a specified confidence level $1-\alpha$. That is, given the task of mapping some inputs
-$X \in \mathcal{X} \mapsto \mathcal{Y}$, we ideally want to construct a set $C(X) \subset \mathcal{Y}$ such that
-$\P(Y \in C(X)) \geq 1 - \alpha$ for all $X \in \mathcal{X}$. As it turns out,
-when the data are i.i.d. or exchangeable, this is pretty easy. The definition of conformal prediction sets and the formal statement of the coverage
+$X \in \mathcal{X} \mapsto \mathcal{Y}$, we ideally want to construct a set $\hat{C}(X) \subset \mathcal{Y}$ such that
+$\P(Y \in \hat{C}(X)) \geq 1 - \alpha$ for all $X \in \mathcal{X}$. This set can be discrete or continous, depending on the prediction space $\mathcal{Y}$ for a given problem. As it turns out,
+when the data are i.i.d.\ or even just exchangeable, this is pretty easy. The definition of conformal prediction sets and the formal statement of the coverage
 guarantee, for exchangeable data, is as follows:
 \begin{theorem}[Conformal prediction sets for exchangeable data]
     Suppose that $(X_i, Y_i)$ for $i = 1, \ldots, n$ and $(X_{\text{test}}, Y_{\text{test}})$ are exchangeable random variables. \\
@@ -76,16 +76,15 @@ guarantee, for exchangeable data, is as follows:
     where $\lceil \cdot \rceil$ is the ceiling function.\\
     Define a prediction set
     \[
-        C(X) = \left\{ y: s(X, y) \leq \hat{q} \right\}
+        \hat{C}(X) = \left\{ y: s(X, y) \leq \hat{q} \right\}
     \]
-    Then \[ \P (Y_{\text{test}} \in C(X_{\text{test}})) \geq 1 - \alpha \]
+    Then \[ \P (Y_{\text{test}} \in \hat{C}(X_{\text{test}})) \geq 1 - \alpha \]
     \label{thm:exchangeable_conformal_prediction}
 \end{theorem}
-Informally, we define a \textit{conformal score} function $s : (\mathcal{X}, \mathcal{Y} \mapsto \R) $ which
-serves as a heuristic measure of how unlikely a given observation is (usually based on a trained model).
-Then, for a test observation $X_{\text{test}}$ we predict the set of all $Y$ which are below approximately the $(1-\alpha)$ quantile of these scores on a calibration dataset.
+Informally, we define a \textit{conformal score} function $s : (\mathcal{X}, \mathcal{Y} \mapsto \R) $ which serves as a heuristic measure of how unlikely a given observation is (usually based on a trained model). This name is perhaps a bit misleading, since it actually measures the degree of an observation's nonconformity with the data used to train the model.
+Next, for a test observation $X_{\text{test}}$ we predict the set of all $Y$ which are below approximately the $(1-\alpha)$ quantile of these scores on a calibration dataset.
 This means that we're choosing a prediction set which contains all $Y$ which are ``not too unlikely'' given the calibration data.
-Note that the coverage guarantee holds for any $s$, but the choice of $s$ will affect the size (and consequently, the usefulness) of the prediction set $C(X)$ - intuitively,
+Note that the coverage guarantee holds for any $s$, but the choice of $s$ will affect the size (and consequently, the usefulness) of the prediction set $\hat{C}(X)$ - intuitively,
 the less informative $s$ is, the larger $C(X)$ will need to be to achieve the desired coverage. \\
 The proof of this coverage guarantee (with the simplifying assumption that $s(X_i, Y_i)$ are unique, to avoid handling ties) is as follows:
 \begin{proof}
@@ -103,7 +102,7 @@ The proof of this coverage guarantee (with the simplifying assumption that $s(X_
             +\infty                             & \text{otherwise }
         \end{cases}$$
     And accordingly construct a prediction set:
-    \[C(X) = \left\{ y: s(X, y) \leq \hat{q} \right\}\]
+    \[\hat{C}(X) = \left\{ y: s(X, y) \leq \hat{q} \right\}\]
     What is the probability that $Y_{\text{test}} \in C(X_{\text{test}})$? This
     is where the exchangeability assumption is crucial. Since the data are exchangeable,
     $s_{\text{test}}$ is distributed identically to $s_{i}$ for any $i = 1, \ldots, n$.
@@ -125,10 +124,10 @@ To help solidify our intuition for conformal prediction, we include a simple out
 procedure as described in \autocite{angelopoulosGentleIntroductionConformal2022} and concurrently expand the example case of
 multi-label image classification:
 \begin{enumerate}
-    \item Given a pre-trained model, we \textbf{identify a heuristic notion of uncertainty} for the model's predictions. In image classification, we might use the softmax probabilities $\hat{f}(X)$ output by the a neural network.
+    \item Given a pre-trained model, we \textbf{identify a heuristic notion of uncertainty} for the model's predictions. In image classification, we might use the softmax probabilities $\hat{f}(X)$ output by a convolutional neural network.
     \item \textbf{Define a conformal score function $\bm{s(\cdot)}$} based on this uncertainty measure. For our example, we might define $s(X, Y)=1-\hat{f}(X)_Y$. This score function is lower for more likely image labels, and higher for less likely image labels.
     \item \textbf{Set a threshold} $\bm{\hat{q}}$ at the $ \frac{\lceil (n+1)(1-\alpha) \rceil }{n}$ quantile of the scores $s(X_i, Y_i)$ for $i = 1, \ldots, n$.
-    \item \textbf{Construct a prediction set} $C(X_{\text{test}}) = \left\{ y: s(X_{\text{test}}, y) \leq \hat{q} \right\}$.
+    \item \textbf{Construct a prediction set} $\hat{C}(X_{\text{test}}) = \left\{ y: s(X_{\text{test}}, y) \leq \hat{q} \right\}$.
           In image classification, this is the set of all image labels with a score below the $\hat{q}$ quantile of scores on the calibration dataset. In other words,
           you add the mostly likely labels to the prediction set until their total probability mass under the distribution of scores on the calibration dataset is at least $1-\alpha$. Then
           the prediction set contains the true image label with probability at least $1-\alpha$.
@@ -144,9 +143,9 @@ We then fit a model to this augmented dataset and compute the scores $s^y(X_i, Y
 The threshold $\hat{q}$ is now dependent on the value $y$ we added to the training data:
 \[ \hat{q}^y = \inf \left\{ q: \frac{\left| i : s^y(X_i, Y_i) \leq q \right|}{n} \geq \frac{\lceil (n+1)(1-\alpha) \rceil }{n} \right\} \]
 And the prediction set becomes:
-\[ C(X) = \left\{ y: s^y(X_{n+1}, y) \leq \hat{q}^y \right\} \]
+\[ \hat{C}(X) = \left\{ y: s^y(X_{n+1}, y) \leq \hat{q}^y \right\} \]
 Intuitively, this is testing if the the new observation $(X_{n+1}, y)$ is exchangeable with all of the other observations, under the null hypothesis that $y$ is the true label for $X_{n+1}$.
-As we will see later on in \ref{sec:density}, this procedure has provable asymptotic efficiency guarantees. We would expect that this procedure would be more efficient than split conformal prediction, since it uses the full dataset to calibrate the model instead of ``wasting'' a subset by splitting. The drawback is that full conformal prediction is prohibitively slow, especially when $|\mathcal{Y}|$ is large - in continuous setting like regression, we would need to fit a new model for each possible value of $y \in \mathbb{R}$. In practice there are computational tricks to speed this up (e.g. evaluating on a grid of values), but it is still much slower than split conformal prediction.
+As we will see later on in \ref{sec:density}, this procedure has provable asymptotic statistical efficiency guarantees. We would expect that this procedure would be more accurate than split conformal prediction, since it uses the full dataset to calibrate the model instead of ``wasting'' a subset by splitting. The drawback is that full conformal prediction is prohibitively slow, especially when $|\mathcal{Y}|$ is large - in continuous setting like regression, we would need to fit a new model for each possible value of $y \in \mathbb{R}$. In practice there are computational tricks to speed this up (e.g. evaluating on a grid of values), but it is still much slower than split conformal prediction. Full conformal prediction is also not possible when we have access to a pretrained model but not the training data itself, since it requires fitting a new model to the full dataset -- we will see an example of this in \ref{sec:application}.
 
 Next, we consider iterative holdout methods which use more data for calibration than split conformal prediction, but manage the tradeoff with computational efficiency.
 
@@ -191,7 +190,7 @@ density level sets for an unknown probability distribution \autocite{leiDistribu
 Consider a sequence of i.i.d. data drawn from some unknown distribution with density $p(y)$.
 If we want to find a set $C$ for a new observation such that
 $\P(Y \in C) \geq 1 - \alpha$, this is equivalent to finding an estimated density level set
-$$L(t_\alpha)=C_\alpha=\{y: \hat{p}(y) \geq t_\alpha\} \quad \text{where} \quad t_\alpha = \inf \{t: \P(Y \in L(t)) \geq 1 - \alpha\}$$
+\[L(t_\alpha)=C_\alpha=\{y: \hat{p}(y) \geq t_\alpha\} \quad \text{where} \quad t_\alpha = \inf \{t: \P(Y \in L(t)) \geq 1 - \alpha\}\]
 We will deal with this more general notation in this section (following the original paper), but it is worth noting that in typical machine learning applications we deal with a model that predicts $Y$ based on some features $X$. The goal is then using that model's predictions to find a set $C(X)$ such that the probability $\P(Y \in C(X) ) \geq 1 - \alpha$.\\
 Note that if $\hat{p}(y)$ were estimated perfectly, we would have no need to conformalize the density level set --
 we would simply greedily add the most likely observations to the set until we reached the desired coverage.
@@ -217,27 +216,79 @@ Importantly, this sandwiching technique also provides lower and upper bounds on 
 
 It is worth noting as well that while the asymptotic efficiency of the kernel density estimator is only proven for the full conformal prediction procedure, kernel density estimation can be used to obtain valid prediction sets in the split conformal prediction setting as well.
 
-\paragraph*{Conformalized Bayes.} Before moving on to the next section, we will mention that framing conformal prediction as a density level set estimation problem also connects nicely to Bayesian inference. In particular, we can choose the conformal score function to be the posterior predictive density of the label given the data, and the prediction set will be the density level set with coverage guarantee $1-\alpha$. ``Conformalized Bayes'' allows us to obtain valid prediction sets for Bayesian models without making any assumptions about the correctness of the model or the data distribution - in this sense it mitigates concerns about misspecified priors. \textcite{hoffBayesoptimalPredictionFrequentist2021} shows that under certain conditions, this procedure is Bayes optimal (in the sense that it minimizes the Bayes risk among all valid prediction sets).
-
 \subsection{Beyond exchangeability}
 \label{sec:nonexchangeable}
-So far we have emphasized that conformal prediction has great assumption-free coverage guarantees for exchangeable data. This is a bit of a contradiction, as exchangeability is a rather strong assumption. In this section, we will discuss extensions of conformal prediction to non-exchangeable data, following \textcite{barberConformalPredictionExchangeability2023}.
+So far we have emphasized that conformal prediction provides wonderful coverage guarantees without assuming anything except exchangeability of the calibration and test data. While this is nice, exchangeability is actually rather strong assumption. In this section, we will discuss extensions of conformal prediction to nonexchangeable data, following \textcite{barberConformalPredictionExchangeability2023}. That work provides accomodations for nonexchangeability in the context of split conformal, full conformal, and jackknife+. Here we will focus only on the split conformal case here -- it is the most popular and is nearly always the best choice in practice, as datasets in modern machine learning applications are usually quite large.
+
+There are two main ways in which the exchangeability assumption can be violated:
+\begin{enumerate}
+    \item The observations $Z_i = (X_i, Y_i)$ are themselves not identically distributed. This could be due to distribution shift between the calibration and test data (perhaps they come from different sources or were collected at different times), or there might be some dependence between the observations in the data-generating process that results in nonexchangeability (e.g. correlation in space or time).
+    \item The algorithm $\mathcal{A}$ which maps the data to a fitted model $\hat{f}$ does not handle the data symmetrically. For example, $\mathcal{A}$ might assume that the data are chronologically ordered and assign more weight to recent observations.
+\end{enumerate}
+Since we are dealing with split conformal prediction, where we assume that the model is pre-fitted, this second form of nonexchangeability is not a concern. We will quickly note that the authors prove that their method for nonexchangeable full conformal and jackknife+ works for both symmetric and asymmetric algorithms, but we will not go into detail here. However, this robustness is important because it means we can accomodate many important machine learning models which are not symmetric, like weighted regression or autoregressive models.
+
+We now introduce a bit more notation that helps formalize nonexchangeability. Let $Z = Z_1, \ldots, Z_n, Z_{\text{test}} = (X_1, Y_1), \ldots, (X_n, Y_n), (X_{\text{test}}, Y_{\text{test}})$, and now let $Z^i$ denote the dataset $Z$ where the test observation is swapped with the $i$th observation. That is, $$Z^i = Z_1, \ldots, Z_{i-1}, Z_{\text{test}}, Z_{i+1}, \ldots, Z_n, Z_i$$
+We define the coverage gap $\Delta$ induced by nonexchangeability as:
+\[ \Delta = (1-\alpha) - \P(Y_{\text{test}} \in C(X_{\text{test}})) \]
+The method for nonexchangeable conformal prediction proposed in \citeauthor{barberConformalPredictionExchangeability2023} assigns weights $w_i \in [0, 1]$ to each observation $Z_i$. The intuition is is that we want to assign more weight to observations which we think are more ``trustworthy'' in the sense that they are more likely to be exchangeable with the test observation (e.g.\ more recent observations a timeseries analysis, or nearby observations in an analysis of spatially correlated data).
+
+\paragraph{Nonexchangeable split conformal prediction} Assign weights $w_i$ to each observation, and further define the normalized weights:
+\[ \tilde{w}_i = \frac{w_i}{1 + \sum_{j=1}^n w_j}, \quad \text{and} \quad \tilde{w}_{\text{test}} = \frac{1}{1 + \sum_{j=1}^n w_j} \]
+Define the prediction set as:
+\[ \hat{C}(X_{\text{test}}) = \left\{ y: s(X_{\text{test}}, y) \leq \hat{q} \right\} \]
+where the threshold is $\hat{q}$ is defined as
+\[ \hat{q} = 1-\alpha ~\text{quantile of}~\sum_{i=1}^n \tilde{w}_i \cdot \delta_{s_i} + \tilde{w}_{\text{test}} \cdot \delta_{+\infty} \]
+where $\delta_{s_i}$ is the Dirac delta function at $s_i=s(X_i, Y_i)$ and $\delta_{+\infty}$ is the Dirac delta function at $+\infty$.
+
+In other words, we compute the conformal scores for each observation $Z_i$, and then compute the weighted sum of these scores. The test observation is assigned a weight of $\tilde{w}_{\text{test}}$, and all other observations are assigned weights $\tilde{w}_i$. The prediction set is then the set of all $y$ such that the score is less than the $1-\alpha$ quantile of the weighted sum of scores. This departure in notation is aided a bit by noting that the original split conformal threshold $\hat{q}$ can equivalently be written as:
+\[ \hat{q} = 1-\alpha ~\text{quantile of}~\sum_{i=1}^n \frac{1}{n+1}\delta_{s_i} + \frac{1}{n+1}\delta_{+\infty}\]
+This is exactly the reduced form of the nonexchangeable threshold above when all the weights are equal to 1 (i.e.\ we assume exchangeability).
+
+\citeauthor{barberConformalPredictionExchangeability2023} prove that weighting the observations in this manner leads to an upper bound on the coverage gap $\Delta$ (phrased differently here than in the original paper):
+\begin{theorem}[Coverage gap induced by nonexchangeability]
+    Consider a sequence of (possibly) nonexchangeable data data Z. For prediction sets defined above, the coverage gap $\Delta$ induced by nonexchangeability is bounded as follows:
+    \[\Delta \leq \sum_{i=1}^n \tilde{w}_i \cdot d_{TV}(Z, Z^i)\]
+    where $d_{TV}$ is the total variation distance between the distributions of $Z$ and $Z^i$.
+\end{theorem}
+
+Importantly in the case of independent (but not necessarily identically distributed) data, there is a helpful result:
+\[ d_{TV}(Z, Z^i) \leq 2 \cdot d_{TV}(Z_i, Z_{\text{test}}) - d_{TV}(Z_i, Z_{\text{test}})^2 \leq 2 \cdot d_{TV}(Z_i, Z_{\text{test}}) \]
+Which allows the bound in our theorem to be simplified to:
+\[\Delta \leq 2 \sum_{i=1}^n \tilde{w}_i \cdot d_{TV}(Z_i, Z_{\text{test}})\]
+This bound implies that the effect of each observation on the coverage gap can be weighted independently -- therefore, if we assign small weights to observations which are nonexchangeable with the test observation, we can mitigate the coverage gap. This confirms our intuition that we should assign more weight to observations which we think are more ``trustworthy'', and means that if we know something about the distribution shifts affecting our data, we can leverage that knowledge to get approximately valid coverage. There is, however, a tradeoff -- assigning small weights reduces the effective sample size, which will lead to larger prediction sets.
+
+Another happy consequence of this theorem is that in the case of exchangeable data, the joint distribution is invariant under permutations so $d_{TV}=0$ and the coverage gap is zero. This means that applying the nonexchangeable split conformal prediction procedure to exchangeable data will not result in any loss of coverage. This means that we get additional robustness to nonexchangeability without sacrificing coverage guarantees.
+
+A final benefit is that the above theorem implies a previously unknown bound on the coverage gap for the original split conformal prediction procedure, which is the special case of the above procedure where all $w_i=1$:
+\[\Delta \leq  \frac{\sum_{i=1}^n d_{TV}(Z_i, Z_{\text{test}})}{n+1}\]
+This bound helps to explain why the original procedures still work reasonably well under mild violations of exchangeability (i.e.\ when the total variation distances between permutations are nonzero but are either sparse or reasonably small).
 
 
 \section{Extensions and related work}
-In this section, we further discuss two crucial extensions of conformal inference
-to settings with non-exchangeable data \autocite{gibbsAdaptiveConformalInference2021, tibshiraniConformalPredictionCovariate2020}.
-We will also discuss some related work on uncertainty quantification for deep neural networks that lies outside the conformal inference framework
+Much of the recent work on conformal prediction has focused on the design of score functions that accomodate various notions of uncertainty or achieve specific desiderata like small prediction sets. In this section, we will briefly discuss some of these extensions.
 
-\subsection{Learn then test}
-See \autocite{angelopoulosLearnThenTest2022}. \\
+% We will also discuss some related work on uncertainty quantification for deep neural networks that lies outside the conformal inference framework
+
+\paragraph*{Conformalized Bayes.} Framing conformal prediction as a density level set estimation problem, as in \ref{sec:density}, also connects nicely to Bayesian inference. In particular, we can choose the conformal score function to be the posterior predictive density of the label given the data, and the prediction set will be the density level set with coverage guarantee $1-\alpha$. ``Conformalized Bayes'' allows us to obtain valid prediction sets for Bayesian models without making any assumptions about the correctness of the model or the data distribution - in this sense it mitigates concerns about misspecified priors. \textcite{hoffBayesoptimalPredictionFrequentist2021} shows that under certain conditions, this procedure is Bayes optimal (in the sense that it minimizes the Bayes risk among all valid prediction sets).
+
+\paragraph*{Scalar uncertainty estimates}
+
+
+\paragraph*{Adaptivity and conditional coverage}
+
+\paragraph*{Group-balancing and fairness}
+
+\paragraph*{More general notions of risk}
+
+\paragraph*{Learn then test}
+See \textcite{angelopoulosLearnThenTest2022}. \\
+
 Maybe go more specifically into conformal language modeling \autocite{quachConformalLanguageModeling2023}.
 
-\section{Application: Adaptive Conformal Prediction for Text Classification}
+\section{Application: Conformal Prediction for Text Classification}
+\label{sec:application}
 In this section, we will provide a case study of how conformal prediction can be used to obtain
-prediction sets with rigorous coverage guarantees for text classification with a large language model (LLM). We will
-compare a naive conformal prediction procedure with an adaptive conformal prediction procedure, and show that the
-adaptive score can lead to smaller prediction sets while preserving valid coverage.
+prediction sets with rigorous coverage guarantees for text classification with a large language model (LLM). We will compare the procedure with a naive conformal to a score which is adaptive to the difficulty of each observation, and show that the adaptive score can lead to smaller prediction sets while preserving valid coverage.
 
 \paragraph*{Model.} We classify text with the transformer-based language model BART \autocite{lewisBARTDenoisingSequencetoSequence2019},
 finetuned on the Multi-Genre Natural Language Inference (MNLI) categorized text corpus \footnote{\url{https://huggingface.co/datasets/multi_nli}},
