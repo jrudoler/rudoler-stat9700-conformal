@@ -34,7 +34,7 @@
     distribution.
     As modern machine learning systems continue to scale in both size and complexity,
     the ability to make valid predictions without making assumptions about the training data or model is becoming increasingly important. In particular, the success and ubiquity of deep and over-parameterized neural networks has led to a growing interest in techniques that can provide statistically rigorous uncertainty quantification for models that are effectively a ``black box''.
-    In this report, we will provide an overview of the conformal prediction framework and some important results, discuss some extensions and demonstrate an application of conformal prediction for a natural language processing (NLP) task.
+    In this report, we will provide an overview of the conformal prediction framework and some important results, discuss some extensions and demonstrate an application of conformal prediction for a natural language processing task with a large language model.
 }
 \newpage
 \tableofcontents
@@ -42,23 +42,20 @@
 \newpage
 \section{Introduction}
 \label{sec:intro}
-Conformal prediction (also known as conformal inference) was first introduced by \textcite{vovkMachineLearningApplicationsAlgorithmic1999} and has seen a surge of interest within the last decade. Contributing to this increased interest is the growing popularity of machine learning models which are effectively ``black boxes'' - that is, models which have so many parameters and such flexible architectures that it is nearly impossible do inference on their learned parameters. Deep neural networks with millions or billions of parameters are now ubiquitous in important tasks in computer vision, natural language processing, and reinforcement learning. These models are for safety-critical applications like medical diagnosis or autonomous driving, making uncertainty quantification paramount for their deployment.
+Conformal prediction (also known as conformal inference) was first introduced by \textcite{vovkMachineLearningApplicationsAlgorithmic1999} and has seen a surge of interest within the last decade. Contributing to this increased interest is the growing popularity of machine learning models which are effectively ``black boxes'' - that is, models which have so many parameters and such flexible architectures that it is nearly impossible do inference on their learned parameters. Deep neural networks with millions or billions of parameters are now ubiquitous in important tasks in computer vision, natural language processing, and reinforcement learning. These models are deployed in safety-critical applications like medical diagnosis or autonomous driving, making uncertainty quantification and rigorous error control paramount.
 
 Conformal prediction provides a framework for constructing prediction sets (in continuous settings like regression, prediction intervals) with rigorous coverage guarantees for \textit{any} model at test time. The only assumption required is that the data are exchangeable, and even this assumption can be relaxed when we have information about the distribution shift that violates exchangeability.
 
-This report is organized as follows: We will begin with an overview of the conformal prediction framework and some important results, then briefly summarize some key extensions, and finally provide an example application of conformal prediction to text classification with a large language model.
+This report is organized as follows: We begin with an overview of the conformal prediction framework and some important results, then briefly summarize some key extensions, and finally provide an example application of conformal prediction to text classification with a large language model.
 
 \section{Foundations}
 \label{sec:foundations}
-This section will begin with a discussion of some conformal prediction basics,
-loosely following~\cite{angelopoulosGentleIntroductionConformal2022}.
-This will include an abbreviated proof of the validity of conformal prediction sets for exchangeable data,
-and an overview of some important applications and extensions of conformal prediction.
-We will then discuss how conformal prediction can be used in a cross-validation setting to obtain confidence intervals with rigorous coverage guarantees \autocite{barberPredictiveInferenceJackknife2020}.
-Next, we will discuss in more detail how conformal prediction can be married to kernel density estimation to obtain prediction sets with asymptotic efficiency
+This exposition will begin with a discussion of some conformal prediction basics, loosely following~\cite{angelopoulosGentleIntroductionConformal2022}.
+We include an abbreviated proof of the validity of conformal prediction sets for exchangeable data.
+Next, we discuss how conformal prediction can be used in a cross-validation setting to obtain confidence intervals with rigorous coverage guarantees \autocite{barberPredictiveInferenceJackknife2020}.
+We then see how conformal prediction can be married to kernel density estimation to obtain prediction sets with asymptotic efficiency
 guarantees \autocite{leiDistributionFreePrediction2013}.
-Finally, we will see what happens when we try to apply conformal prediction to
-non-exchangeable data \autocite{barberConformalPredictionExchangeability2023}.
+Finally, we will see what happens when we try to apply conformal prediction to non-exchangeable data \autocite{barberConformalPredictionExchangeability2023}.
 
 \subsection{Conformal prediction basics}
 \label{sec:basics}
@@ -74,7 +71,7 @@ guarantee, for exchangeable data, is as follows:
     \[
         \hat{q} = \inf \left\{ q: \frac{\left| i : s(X_i, Y_i) \leq q \right|}{n} \geq \frac{\lceil (n+1)(1-\alpha) \rceil }{n} \right\}
     \]
-    where $\lceil \cdot \rceil$ is the ceiling function.\\
+    where $s : (\mathcal{X} \times \mathcal{Y} \mapsto \R) $ and $\lceil \cdot \rceil$ is the ceiling function.\\
     Define a prediction set
     \[
         \hat{C}(X) = \left\{ y: s(X, y) \leq \hat{q} \right\}
@@ -82,11 +79,11 @@ guarantee, for exchangeable data, is as follows:
     Then \[ \P (Y_{\text{test}} \in \hat{C}(X_{\text{test}})) \geq 1 - \alpha \]
     \label{thm:exchangeable_conformal_prediction}
 \end{theorem}
-Informally, we define a \textit{conformal score} function $s : (\mathcal{X}, \mathcal{Y} \mapsto \R) $ which serves as a heuristic measure of how unlikely a given observation is (usually based on a trained model). This name is perhaps a bit misleading, since it actually measures the degree of an observation's nonconformity with the data used to train the model.
+Informally, we define a \textit{conformal score} function, $s$, which serves as a heuristic measure of how unlikely a given observation is (usually based on a trained model). This name is perhaps a bit misleading, since it actually measures the degree of an observation's nonconformity with the data used to train the model.
 Next, for a test observation $X_{\text{test}}$ we predict the set of all $Y$ which are below approximately the $(1-\alpha)$ quantile of these scores on a calibration dataset.
 This means that we're choosing a prediction set which contains all $Y$ which are ``not too unlikely'' given the calibration data.
-Note that the coverage guarantee holds for any $s$, but the choice of $s$ will affect the size (and consequently, the usefulness) of the prediction set $\hat{C}(X)$ - intuitively,
-the less informative $s$ is, the larger $C(X)$ will need to be to achieve the desired coverage. \\
+Note that the coverage guarantee holds for any $s$, but the choice of $s$ will affect the size (and consequently, the usefulness) of the prediction set $\hat{C}(X)$ --\
+the less informative $s$ is, the larger $\hat{C}(X)$ will need to be to achieve the desired coverage. \\
 The proof of this coverage guarantee (with the simplifying assumption that $s(X_i, Y_i)$ are unique, to avoid handling ties) is as follows:
 \begin{proof}
     Begin with a set of exchangeable pairs $(X_1, Y_1), \ldots, (X_n, Y_n), (X_\text{test}, Y_\text{test})$. We
@@ -97,7 +94,7 @@ The proof of this coverage guarantee (with the simplifying assumption that $s(X_
     % scores on our calibration dataset reflects how unlikely our model thinks true labels are over this data distribution.
     We can sort the scores $s(X_i, Y_i)$ for $i = 1, \ldots, n$ in ascending order, and denote the $i$th smallest score by $s_{(i)}$.
     We set the threshold
-    \[\hat{q} = \inf \left\{ q: \frac{\left| i : s(X_i, Y_i) \leq q \right|}{n} \geq \frac{\lceil (n+1)(1-\alpha) \rceil }{n}\right\}\]
+    \[\hat{q} = \inf \left\{ q: \frac{\left| i : s_{(i)} \leq q \right|}{n} \geq \frac{\lceil (n+1)(1-\alpha) \rceil }{n}\right\}\]
     Since the scores are sorted (with no ties), we can see that $$\hat{q} = \begin{cases}
             s_{(\lceil (n+1)(1-\alpha) \rceil)} & \text{if } \alpha \geq \frac{1}{n+1} \\
             +\infty                             & \text{otherwise }
@@ -107,7 +104,7 @@ The proof of this coverage guarantee (with the simplifying assumption that $s(X_
     What is the probability that $Y_{\text{test}} \in C(X_{\text{test}})$? This
     is where the exchangeability assumption is crucial. Since the data are exchangeable,
     $s_{\text{test}}$ is distributed identically to $s_{i}$ for any $i = 1, \ldots, n$.
-    It follows that $s_{\text{test}}$ is equally likely to be fall into any of the $n+1$ intervals between the $n$ calibration scores.
+    It follows that $s_{\text{test}}$ is equally likely to fall into any of the $n+1$ intervals between the $n$ calibration scores.
     Formally, for any integer $k$ we have:
     \[ \P(s_{\text{test}} \leq s_{(k)}) = \frac{k}{n+1} \]
     In particular, we have:
@@ -118,11 +115,12 @@ The proof of this coverage guarantee (with the simplifying assumption that $s(X_
 Part of the ``magic'' of conformal prediction is that this procedure can be applied
 post-training to any model, for basically any prediction task. That means we can treat any
 model as a ``black box'' and still obtain valid prediction sets without making any assumptions
-about how the model was parameterized. While we assume that the data are exchangeable (i.e. identically distributed),
+about how the model was parameterized. While we assume that the data are exchangeable (i.e.\ the joint distribution is invariant to permutations),
 they need not be independent or to follow any particular distribution. We will see later
-how this assumption can be relaxed to allow for non-exchangeable data. \\
+how this assumption can be relaxed to allow for non-exchangeable data.
+
 To help solidify our intuition for conformal prediction, we include a simple outline of the conformal
-procedure as described in \autocite{angelopoulosGentleIntroductionConformal2022} and concurrently expand the example case of
+procedure and concurrently expand the example case of
 multi-label image classification:
 \begin{enumerate}
     \item Given a pre-trained model, we \textbf{identify a heuristic notion of uncertainty} for the model's predictions. In image classification, we might use the softmax probabilities $\hat{f}(X)$ output by a convolutional neural network.
@@ -146,13 +144,14 @@ The threshold $\hat{q}$ is now dependent on the value $y$ we added to the traini
 And the prediction set becomes:
 \[ \hat{C}(X) = \left\{ y: s^y(X_{n+1}, y) \leq \hat{q}^y \right\} \]
 Intuitively, this is testing if the the new observation $(X_{n+1}, y)$ is exchangeable with all of the other observations, under the null hypothesis that $y$ is the true label for $X_{n+1}$.
-As we will see later on in \ref{sec:density}, this procedure has provable asymptotic statistical efficiency guarantees. We would expect that this procedure would be more accurate than split conformal prediction, since it uses the full dataset to calibrate the model instead of ``wasting'' a subset by splitting. The drawback is that full conformal prediction is prohibitively slow, especially when $|\mathcal{Y}|$ is large - in continuous setting like regression, we would need to fit a new model for each possible value of $y \in \mathbb{R}$. In practice there are computational tricks to speed this up (e.g. evaluating on a grid of values), but it is still much slower than split conformal prediction. Full conformal prediction is also not possible when we have access to a pretrained model but not the training data itself, since it requires fitting a new model to the full dataset -- we will see an example of this in \ref{sec:application}.
+
+As we will see later on in~\ref{sec:density}, full conformal has provable asymptotic statistical efficiency guarantees. We would expect that this procedure would be more accurate than split conformal prediction, since it uses the full dataset to calibrate the model instead of ``wasting'' a subset by splitting. The drawback is that full conformal prediction is prohibitively slow, especially when $|\mathcal{Y}|$ is large --\ in continuous settings like regression, we would need to fit a new model for each possible value of $y \in \mathbb{R}$. In practice there are computational tricks to speed this up (e.g\ evaluating on a grid of values), but it is still much slower than split conformal prediction. Full conformal prediction is also not possible when we have access to a pretrained model but not the training data itself, since it requires fitting a new model to the full dataset --\ we will see an example of this in~\ref{sec:application}.
 
 Next, we consider iterative holdout methods which use more data for calibration than split conformal prediction, but manage the tradeoff with computational efficiency.
 
 \subsection{Holdout methods: Jackknife+ and CV+}
 \label{sec:jackknife}
-\textcite{barberPredictiveInferenceJackknife2020} discuss the application of conformal prediction to iterative holdout methods, which are a popular approach to uncertainty quantification in machine learning. To avoid overfitting, it is common to train a model on a partial dataset and reserve the remaining observation as a holdout for validation (or test). Split conformal prediction, as described above, is an example of a method with a single holdout - the conformal procedure is calibrated on part of the data and then applied to the remaining holdout data. (Actually, in practice there is a third set of data - the training data - which is used to fit the model, but not used in the conformal procedure.) Instead of using a single holdout, iterative holdout methods like jackknife and cross-validation iteratively hold out different subsets of the data in order get unbiased estimates of the model's performance while still making use of the entire dataset.
+\textcite{barberPredictiveInferenceJackknife2020} discuss the application of conformal prediction to iterative holdout methods, which are a popular approach to uncertainty quantification in machine learning. To avoid overfitting, it is common to train a model on a partial dataset and reserve the remaining observations as a holdout for validation (or test). Split conformal prediction, as described above, is an example of a method with a single holdout --\ the conformal procedure is calibrated on part of the data and then applied to the remaining holdout data. (Actually, in practice there is a third set of data --\ the training data --\ which is used to fit the model, but not used in the conformal procedure.) Instead of using a single holdout, iterative holdout methods like jackknife and cross-validation iteratively hold out different subsets of the data in order get unbiased estimates of the model's performance while still making use of the entire dataset.
 
 Before proceeding, we define some added notation. Take $\hat{q}^+\{\cdot \}$ is the $\frac{\lceil (n+1)(1-\alpha) \rceil }{n}$ quantile, and $\hat{q}^-\{\cdot \}$ is the $\frac{\lfloor (n+1)\alpha \rfloor }{n}$ quantile. We will also use the notation $\hat{f}_{-i}(X_i)$ to denote the model fit to the full dataset without the $i$th observation.
 
@@ -175,7 +174,7 @@ The main result of \textcite{barberPredictiveInferenceJackknife2020} is to prove
 \[ \P(Y_{n+1} \in \hat{C}^{JK+}(X_{n+1})) \geq 1 - 2\alpha \]
 The authors note that in practice, the empirical coverage of both jackknife and jackknife+ is close to $1-\alpha$, and the main advantage of jackknife+ is that it still provides some coverage guarantee even in worst-case scenarios when the model is not stable.
 
-The authors also propose a generalization of this procedure to k-fold cross-validation, which they call CV+. The procedure is the same as above, but we leave out the set of observations $S_k$ in the $k$th fold rather than a single observation. The prediction set is then:
+\textcite{barberPredictiveInferenceJackknife2020} also propose a generalization of this procedure to k-fold cross-validation, which they call CV+. The procedure is the same as above, but we leave out the set of observations $S_k$ in the $k$th fold rather than a single observation. The prediction set is then:
 \begin{align*}
     \hat{C}^{CV+}(X_{n+1}) =
      & \Big[ \hat{q}^{-}\left\{ \hat{f}_{-S_k}(X_{n+1}) - |Y_i - \hat{f}_{-S_k}(X_i)|\right\},   \\
@@ -192,18 +191,21 @@ Consider a sequence of i.i.d. data drawn from some unknown distribution with den
 If we want to find a set $C$ for a new observation such that
 $\P(Y \in C) \geq 1 - \alpha$, this is equivalent to finding an estimated density level set
 \[L(t_\alpha)=C_\alpha=\{y: \hat{p}(y) \geq t_\alpha\} \quad \text{where} \quad t_\alpha = \inf \{t: \P(Y \in L(t)) \geq 1 - \alpha\}\]
-We will deal with this more general notation in this section (following the original paper), but it is worth noting that in typical machine learning applications we deal with a model that predicts $Y$ based on some features $X$. The goal is then using that model's predictions to find a set $C(X)$ such that the probability $\P(Y \in C(X) ) \geq 1 - \alpha$.\\
-Note that if $\hat{p}(y)$ were estimated perfectly, we would have no need to conformalize the density level set --
-we would simply greedily add the most likely observations to the set until we reached the desired coverage.
+We will deal with this more general notation in this section (following the original paper), but it is worth noting that in typical machine learning applications we deal with a model that predicts $Y$ based on some features $X$. The goal is then using that model's predictions to find a set $C(X)$ such that the probability $\P(Y \in C(X) ) \geq 1 - \alpha$.
+
+Note that if $\hat{p}(y)$ were estimated perfectly, we would have no need to conformalize the density level set --\
+it is equivalent to greedily adding the most likely observations to the prediction set until we reach the desired coverage.
 However, in practice we will need to estimate $\hat{p}(y)$ from a finite sample
-of data and inevitably introduce some error which might cause us to undercover or overcover. \\
-We now consider the standard kernel density estimator (KDE) with kernel fuction $K$ and bandwidth $h$, \\
+of data and inevitably introduce some error which might cause us to undercover or overcover.
+
+We now consider the standard kernel density estimator (KDE) with kernel fuction $K$ and bandwidth $h$,
 \[\hat{p}(u) = \frac{1}{n} \sum_{i=1}^n K_h(u-Y_i) \]
 For our score function, we will use an augmented version of the KDE which is estimated on the augmented dataset $Y_1, \ldots, Y_{n+1}$ where $Y_{n+1}= y$:
 \[ \hat{p}^y(u) = \frac{1}{n+1} \sum_{i=1}^{n+1} K_h(u-Y_i) \]
 The paper defines a conformal score a bit differently than we have so far, such that higher conformal scores correspond to more likely labels. This is helpful in order to more naturally frame the prediction set as a density level set. So we have $s^y(y) = \hat{p}^y(y)$, and we set the threshold $\hat{q}^y$ at the $ \frac{\lfloor (n+1)\alpha \rfloor }{n}$ quantile of the scores $s^y(X_i, Y_i)$ for $i = 1, \ldots, n$ and take the valid prediction set to be:
 \[ \hat{C}_\alpha = L(\hat{t}_\alpha) = \left\{ y: s^y(y) \geq \hat{q}^y \right\} \]
-So, our prediction set is all $y$ such that the estimated density level set $L(\hat{t}_\alpha)$ contains $y$ with probability at least $1-\alpha$. (Note that this is equivalent to making the score function $s^y(y)=-\hat{p}^y(y)$, defining $\hat{q}^y$ at the $ \frac{\lceil (n+1)(1-\alpha) \rceil }{n}$ quantile of the scores, taking a prediction set $\hat{C}_\alpha = \left\{ y : s^y(y)\leq \hat{q}^y \right\}$.)  \\
+So, our prediction set is all $y$ such that the estimated density level set $L(\hat{t}_\alpha)$ contains $y$ with probability at least $1-\alpha$. (Note that this is equivalent to making the score function $s^y(y)=-\hat{p}^y(y)$, defining $\hat{q}^y$ at the $ \frac{\lceil (n+1)(1-\alpha) \rceil }{n}$ quantile of the scores, taking a prediction set $\hat{C}_\alpha = \left\{ y : s^y(y)\leq \hat{q}^y \right\}$.)
+
 Since this kernel density estimator is expensive to compute for every possible value of $y$, \citeauthor{leiDistributionFreePrediction2013} propose a faster approximation that sandwiches the kernel density estimator between two simpler estimators ($L^-$ and $L^+$) and preserves finite-sample validity. That is, they they define the following lemma:
 \begin{lemma}
     Let $\hat{C}_\alpha$ be the conformal prediction set based on the KDE with kernel function $K$, and assume $\sup_u |K(u)|=K(0)$. Let $Y_{(1)} \ldots Y_{(n)}$ be the data in increasing order by their estimated kernel density.
@@ -281,7 +283,7 @@ While typical Bayesian modeling has strong inductive biases and is often not app
 
 \subsection{Scalar uncertainty estimates}
 \label{sec:scalar}
-There are many existing methods in the machine learning literature which provide estimates of uncertainty at the level of individual predictions, and often they are quite precise and even provide excellent empirical coverage. The problem is that these approaches do not in general have theoretical coverage guarantees. Luckily, these approaches are compatible with conformal prediction, and in fact conformal prediction \textit{relies} on heuristic uncertainty estimates built into the conformal score in order to construct prediction sets. As discussed in~\ref*{sec:basics}, without an informative score function the prediction sets will be large and imprecise. Conformalizing these heuristic uncertainty estimates can give us prediction sets which are both accurate and precise.
+There are many existing methods in the machine learning literature which provide estimates of uncertainty at the level of individual predictions, which often are quite precise and provide excellent empirical coverage. The problem is that these approaches do not in general have theoretical coverage guarantees. Luckily, these approaches are compatible with conformal prediction, and in fact conformal prediction \textit{relies} on heuristic uncertainty estimates built into the conformal score in order to construct prediction sets. As discussed in~\ref*{sec:basics}, without an informative score function the prediction sets will be large and imprecise. Conformalizing these heuristic uncertainty estimates can give us prediction sets which are both precise and provably accurate.
 
 One example of a popular approach to uncertainty quantification, especially in deep learning, is to use a modified loss function which downweights residuals with a high estimated uncertainty. A large neural network can easily be modified to output a scalar uncertainty estimate along with its prediction \autocite{nixEstimatingMeanVariance1994,lakshminarayananSimpleScalablePredictive2017,angelopoulosImagetoImageRegressionDistributionFree2022}. A simple update to the typical squared error loss is a Gaussian loss function (i.e. maximizing the log likelihood): \[\mathcal{L}(x, y) = \log(\hat{\sigma}(x)) + \frac{(y-\hat{\mu}(x))^2}{\hat{\sigma}(x)}\]
 where $\hat{\mu}(x)$ and $\hat{\sigma}(x)$ are the predicted mean (point estimate) and variance.
@@ -305,11 +307,11 @@ The overall coverage guarantees of conformal prediction are reassuring, but we m
 
 One way to think about adaptivity is that if it worked perfectly, it would actually amount to a much stronger coverage guarantee: \textit{conditional coverage}. The original coverage guarantee can be thought of as \textit{marginal coverage}, where we achieved coverage on average over all the data. Conditional coverage would be a guarantee that we achieve coverage conditional on the input. Formally, conditional coverage requires
 \[ \P(Y_{\text{test}} \in C(X_{\text{test}}) | X_{\text{test}}) \geq 1 - \alpha \]
-Unfortunately, conditional coverage is actually impossible to achieve in the most general case --\ there are certain requirements for the sample size and desired error tolerance, as well as properties of the underlying distribution \cite{vovkConditionalValidityInductive2012,barberLimitsDistributionfreeConditional2021}. Further work has developed some theory and various metrics to evaluate conditional coverage \autocite{angelopoulosUncertaintySetsImage2022,cauchoisKnowingWhatYou2021,feldmanImprovingConditionalCoverage2021}.
+Unfortunately, finite-sample conditional coverage is actually impossible to achieve in the most general case --\ there are certain requirements for the sample size and desired error tolerance, as well as properties of the underlying distribution \cite{vovkConditionalValidityInductive2012,barberLimitsDistributionfreeConditional2021}. Further work has developed some theory and various metrics to evaluate conditional coverage \autocite{angelopoulosUncertaintySetsImage2022,cauchoisKnowingWhatYou2021,feldmanImprovingConditionalCoverage2021}.
 
 \subsection{Group-balancing and fairness}
 \label{sec:fairness}
-A related topic that has garnered substantial recent attention is subgroup fairness in machine learning \autocite{dengFIFAMakingFairness2022,FairnessCriminalJustice,kearnsPreventingFairnessGerrymandering2018}. There are actually many possible notions of fairness, but for the task at hand we are interested in conditional coverage guarantees for each subgroup (this is similar to controlling type II error within groups in some of the fairness literature). While general conditional coverage cannot be achieved, this special case is feasible as proved by \textcite{vovkConditionalValidityInductive2012}. Consider a dataset with groups $g = \{ 1, \ldots, G \}$, and let the first feature of every feature vector be the group label. We express the coverage guarantee as:
+A related topic that has garnered substantial recent attention is subgroup fairness in machine learning \autocite{dengFIFAMakingFairness2022,kearnsPreventingFairnessGerrymandering2018}. There are actually many possible notions of fairness, but for the task at hand we are interested in conditional coverage guarantees for each subgroup (this is similar to controlling type II error within groups in some of the fairness literature). While general conditional coverage cannot be achieved, this special case is feasible as proved by \textcite{vovkConditionalValidityInductive2012}. Consider a dataset with groups $g = \{ 1, \ldots, G \}$, and let the first feature of every feature vector be the group label. We express the coverage guarantee as:
 \[ \P(Y_{\text{test}} \in C(X_{\text{test}}) | X_{\text{test},1} = g) \geq 1 - \alpha \]
 To accomodate this we compute the conformal scores as usual for each observation, but then we compute the quantiles of the scores for each group separately. That is,
 \[ \hat{q}_g = \frac{\lceil (n_g+1)(1-\alpha) \rceil }{n_g} ~\text{quantile of}~\{ s(X_i, Y_i) : X_{i,1} = g \} \]
@@ -321,7 +323,7 @@ A closely related problem for classification problems is ensuring coverage condi
 \[ \P(Y_{\text{test}} \in C(X_{\text{test}}) | Y_{\text{test}} = y) \geq 1 - \alpha \]
 for all $y \in \mathcal{Y}$. This is harder because we do not have access to the labels at test, but the solution is quite similar. We again compute the quantiles of the scores for each label $k$ separately, and then the prediction set for a new observation $X_{\text{test}}$ is:
 \[ \hat{C}(X_{\text{test}}) = \left\{ y: s(X_{\text{test}}, y) \leq \hat{q}_{y} \right\} \]
-The key difference is that because we don't know the true class at test time, the quantile $\hat{q}_y$ is different for each provisional label $y$. So, the scores for each provisional label are compared against different thresholds.
+The key difference is that because we don't know the true class at test time, the quantile $\hat{q}_y$ is different for each provisional label $y$. So, the scores for each provisional label are compared against different thresholds. We demonstrate the effectiveness of this approach in \ref*{sec:application}.
 
 \subsection{More general notions of risk}
 We briefly note that some work has been done to extend conformal prediction to more general notions of risk control, including controlling for multiple risk functions \autocite{angelopoulosLearnThenTest2022,batesDistributionfreeRiskcontrollingPrediction2021}. We will not go into detail here as it requires developing substantial notation and theory for a topic that is a bit outside of the scope of this report, but this is a recent advent in the conformal prediction literature that is a promising direction for future work.
@@ -332,10 +334,10 @@ The following case study demonstrates how conformal prediction can be used to ob
 
 \paragraph*{Model.} We classify text with the transformer-based language model BART \autocite{lewisBARTDenoisingSequencetoSequence2019},
 finetuned on the Multi-Genre Natural Language Inference (MNLI) categorized text corpus \footnote{\url{https://huggingface.co/datasets/multi_nli}},
-as proposed by \textcite{yinBenchmarkingZeroshotText2019} for zero-shot text classification. The approach is to treat the task of text classification as a natural language inference (NLI) task, where the premise is the text to be classified and the hypothesis is a statement about the label like ``This text is about politics''. The model computes the probability that the hypothesis is true given the premise, and we repeat this for each label independently.
+as proposed by \textcite{yinBenchmarkingZeroshotText2019} for zero-shot text classification. The approach is to treat the task of text classification as a natural language inference (NLI) task, where the premise is the text to be classified and the hypothesis is a statement about the label like ``This text is about politics''. The model computes the probability that the hypothesis is true given the premise, independently for each label.
 
 We note that this model is no longer state of the art, but it is more lightweight (400 million parameters) than the larger and more performant models which have gained prominence (e.g. Meta's Llama2 models range from 7-70 billion parameters), and therefore more suitable for fast inference on a laptop.
-Since we are interested in demonstrating the utility of conformal prediction, we do not need to use the most powerful model available.
+Since we are just interested in demonstrating the utility of conformal prediction, we do not need to use the most powerful model available.
 We will see that this model results in prediction sets which are fairly large, and it is likely that a more powerful model would result give us better heuristic uncertainty estimates and therefore smaller prediction sets.
 
 
@@ -362,6 +364,7 @@ One qualification is that these prediction set sizes, overall, are still quite l
 
 The last important result is that as expected, neither score function alone achieves conditional coverage for each category. However, the class-conditional conformal procedure improves the conditional coverage dramatically and achieves approximate coverage.
 
+This case study underscores the utility of conformal prediction --\ we can obtain prediction sets with rigorous coverage guarantees in a setting where we know very little about our model or its training data. We simply calibrate the model's predictions on a holdout dataset, and proceed with confidence.
 
 % include vertically stacked subfigures for coverage
 \begin{figure}[ht]
