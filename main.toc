@@ -1,0 +1,16 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {section}{\numberline {2}Foundations}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Conformal prediction basics}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Holdout methods: Jackknife+ and CV+}{6}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Density estimation}{7}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Beyond exchangeability}{9}{subsection.2.4}%
+\contentsline {paragraph}{Nonexchangeable split conformal prediction}{9}{section*.3}%
+\contentsline {section}{\numberline {3}Extensions and related work}{11}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Conformalized Bayes.}{11}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Scalar uncertainty estimates}{12}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Quantile Regression}{12}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Adaptivity and conditional coverage}{13}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Group-balancing and fairness}{13}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}More general notions of risk}{14}{subsection.3.6}%
+\contentsline {section}{\numberline {4}Application: Conformal Prediction for Text Classification}{14}{section.4}%
+\contentsline {paragraph}{Conformal scores}{15}{section*.7}%

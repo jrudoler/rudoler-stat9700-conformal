@@ -30,20 +30,21 @@
 
 \abstract{
     \footnotesize
-    Conformal prediction is a model-agnostic framework for constructing valid prediction sets (and corresponding hypothesis tests) without making any assumptions about the underlying data
+    Conformal prediction is a model-agnostic framework for constructing valid prediction sets without making any assumptions about the underlying data
     distribution.
     As modern machine learning systems continue to scale in both size and complexity,
-    the ability to make valid predictions without making assumptions about the training data or model is becoming increasingly important. In particular, the success and ubiquity
-    of deep and over-parameterized neural networks has led to a growing interest in
-    techniques that can provide statistically rigorous uncertainty quantification for models that are effectively a ``black box''.
-    In this report, we will provide an overview of the conformal inference framework and some important results, discuss some extensions and demonstrate an application of conformal inference in a natural language processing setting.
+    the ability to make valid predictions without making assumptions about the training data or model is becoming increasingly important. In particular, the success and ubiquity of deep and over-parameterized neural networks has led to a growing interest in techniques that can provide statistically rigorous uncertainty quantification for models that are effectively a ``black box''.
+    In this report, we will provide an overview of the conformal prediction framework and some important results, discuss some extensions and demonstrate an application of conformal prediction for a natural language processing (NLP) task.
 }
+\newpage
+\tableofcontents
 
+\newpage
 \section{Introduction}
 \label{sec:intro}
 Conformal prediction (also known as conformal inference) was first introduced by \textcite{vovkMachineLearningApplicationsAlgorithmic1999} and has seen a surge of interest within the last decade. Contributing to this increased interest is the growing popularity of machine learning models which are effectively ``black boxes'' - that is, models which have so many parameters and such flexible architectures that it is nearly impossible do inference on their learned parameters. Deep neural networks with millions or billions of parameters are now ubiquitous in important tasks in computer vision, natural language processing, and reinforcement learning. These models are for safety-critical applications like medical diagnosis or autonomous driving, making uncertainty quantification paramount for their deployment.
 
-Conformal prediction provides a framework for constructing prediction sets (in continuous settings like regression, prediction intervals) with rigorous coverage guarantees for \textit{any} model at test time. The only assumption required is that the data are exchangeable, and we will see examples later of how this assumption can be relaxed.
+Conformal prediction provides a framework for constructing prediction sets (in continuous settings like regression, prediction intervals) with rigorous coverage guarantees for \textit{any} model at test time. The only assumption required is that the data are exchangeable, and even this assumption can be relaxed when we have information about the distribution shift that violates exchangeability.
 
 This report is organized as follows: We will begin with an overview of the conformal prediction framework and some important results, then briefly summarize some key extensions, and finally provide an example application of conformal prediction to text classification with a large language model.
 
@@ -265,30 +266,69 @@ This bound helps to explain why the original procedures still work reasonably we
 
 
 \section{Extensions and related work}
-Much of the recent work on conformal prediction has focused on the design of score functions that accomodate various notions of uncertainty or achieve specific desiderata like small prediction sets. In this section, we will briefly discuss some of these extensions.
+\label{sec:extensions}
+Much of the recent work on conformal prediction has focused on the design of score functions that accomodate various notions of uncertainty or achieve specific desiderata like small prediction sets. In this section, we will briefly discuss some of these extensions. The discussion here is inspired by \textcite{angelopoulosGentleIntroductionConformal2022}, which provides a very comprehensive and up-to-date survey.
 
 % We will also discuss some related work on uncertainty quantification for deep neural networks that lies outside the conformal inference framework
 
-\paragraph*{Conformalized Bayes.} Framing conformal prediction as a density level set estimation problem, as in \ref{sec:density}, also connects nicely to Bayesian inference. In particular, we can choose the conformal score function to be the posterior predictive density of the label given the data, and the prediction set will be the density level set with coverage guarantee $1-\alpha$. ``Conformalized Bayes'' allows us to obtain valid prediction sets for Bayesian models without making any assumptions about the correctness of the model or the data distribution - in this sense it mitigates concerns about misspecified priors. \textcite{hoffBayesoptimalPredictionFrequentist2021} shows that under certain conditions, this procedure is Bayes optimal (in the sense that it minimizes the Bayes risk among all valid prediction sets).
+\subsection{Conformalized Bayes.}
+\label{sec:bayes}
+Framing conformal prediction as a density level set estimation problem, as in~\ref{sec:density}, also connects nicely to Bayesian inference. In particular, we can choose the conformal score function to be the posterior predictive density of the label given the data:
+\[ s(X, y) = -\hat{f}(y | X) \]
+Then the prediction set will be the poster predictive density level set with coverage guarantee $1-\alpha$. ``Conformalized Bayes'' allows us to obtain valid prediction sets for Bayesian models without making any assumptions about the correctness of the model or the data distribution --\ in this sense it mitigates concerns about misspecified priors. \textcite{hoffBayesoptimalPredictionFrequentist2021} shows that under certain conditions, the split conformal procedure with the above score is Bayes optimal (it minimizes the integrated risk --\ wherein we consider the expectation of the loss over both the data and the prior --\ among all valid prediction sets). The important takeaway is that we can incorporate prior knowledge into our predictions without sacrificing coverage guarantees.
 
-\paragraph*{Scalar uncertainty estimates}
+While typical Bayesian modeling has strong inductive biases and is often not appropriate in settings where we know little about the data generating process, this is still relevant as Bayesian deep learning \autocite{mackayBayesianMethodsAdaptive1992,galDropoutBayesianApproximation2016,wilsonBayesianDeepLearning2020} has gained popularity. Bayesian neural networks are neural networks with some (usually noninformative) prior distribution over the weights, which use a variety of clever techniques to estimate uncertainty by approximating the posterior predictive distribution. Like regular Bayesian models trained with expensive sampling procedures, Bayesian neural networks are computationally expensive compared to their non-Bayesian counterparts (though not prohibitively so).
 
+\subsection{Scalar uncertainty estimates}
+\label{sec:scalar}
+There are many existing methods in the machine learning literature which provide estimates of uncertainty at the level of individual predictions, and often they are quite precise and even provide excellent empirical coverage. The problem is that these approaches do not in general have theoretical coverage guarantees. Luckily, these approaches are compatible with conformal prediction, and in fact conformal prediction \textit{relies} on heuristic uncertainty estimates built into the conformal score in order to construct prediction sets. As discussed in~\ref*{sec:basics}, without an informative score function the prediction sets will be large and imprecise. Conformalizing these heuristic uncertainty estimates can give us prediction sets which are both accurate and precise.
 
-\paragraph*{Adaptivity and conditional coverage}
+One example of a popular approach to uncertainty quantification, especially in deep learning, is to use a modified loss function which downweights residuals with a high estimated uncertainty. A large neural network can easily be modified to output a scalar uncertainty estimate along with its prediction \autocite{nixEstimatingMeanVariance1994,lakshminarayananSimpleScalablePredictive2017,angelopoulosImagetoImageRegressionDistributionFree2022}. A simple update to the typical squared error loss is a Gaussian loss function (i.e. maximizing the log likelihood): \[\mathcal{L}(x, y) = \log(\hat{\sigma}(x)) + \frac{(y-\hat{\mu}(x))^2}{\hat{\sigma}(x)}\]
+where $\hat{\mu}(x)$ and $\hat{\sigma}(x)$ are the predicted mean (point estimate) and variance.
 
-\paragraph*{Group-balancing and fairness}
+With this uncertainty estimate in hand, we can construct a score function:
+\[ s(X, y) = \frac{|y-\hat{\mu}(X)|}{\hat{\sigma}(X)} \]
+This score function grows when the residual is large relative to the uncertainty estimate. In other words, large scores reflect unexpectedly large residuals --\ the score adaptively shrinks when the model expects high variance. Taking $\hat{q}$ to be the $\frac{\lceil (n+1)(1-\alpha) \rceil }{n}$ quantile the calibration scores, we can form the prediction intervals:
+\[ \hat{C}(X_{\text{test}}) = \left[ \hat{f}(x) - \hat{q} \cdot \hat{\sigma}(x), \hat{f}(x) + \hat{q} \cdot \hat{\sigma}(x) \right] \]
 
-\paragraph*{More general notions of risk}
+Effectively, $\hat{q}$ serves as a multiplicative correction factor for the uncertainty estimate that ensures that the prediction set has the desired coverage. If the uncertainty estimates are too conservative (i.e. the residuals are consistently smaller than the uncertainty estimates), $\hat{q}$ will be smaller than 1 and will shrink the prediction set. If the uncertainty estimates are too optimistic (i.e. the residuals are consistently larger than the uncertainty estimates), $\hat{q}$ will be larger than 1 and will expand the prediction set.
 
-\paragraph*{Learn then test}
-See \textcite{angelopoulosLearnThenTest2022}. \\
+We note that this uncertainty estimate does not need to be the Gaussian variance estimated this way, and other modified loss functions have been proposed \autocite{tohmeReliableNeuralNetworks2023}. There are many ways to obtain scalar uncertainty estimates of a neural network's predictions, including estimating variance across ensembles or when randomly dropping out neurons or layers in a network. These approaches are totally compatible with the above conformal score and prediction set construction.
 
-Maybe go more specifically into conformal language modeling \autocite{quachConformalLanguageModeling2023}.
+\subsection{Quantile Regression}
+\label{sec:quantile}
+Briefly, we mention that a related and popular technique is quantile regression \autocite{koenkerRegressionQuantiles1978} which also modifies the loss function so that the model learns to predict quantiles instead of point estimates. Like the Gaussian loss function, this can be used on top of practically any model architecture and can similarly be conformalized to grow or shrink the prediction set to achieve coverage during calibration \autocite{romanoConformalizedQuantileRegression2019}. This approach inherits nice statistical properties from quantile regression, including asymptotic conditional coverage (which we discuss next).
+
+\subsection{Adaptivity and conditional coverage}
+\label{sec:adaptivity}
+The overall coverage guarantees of conformal prediction are reassuring, but we might have additional desiderata for our prediction sets. In particular, the coverage guarantee is averaged over all of the data in our calibration set, but any practitioner of data science knows that most datasets are not heterogeneous --\ a model may perform better on some subsets of the data than others. In conformal prediction, this can lead to some subsets being overcovered and others undercovered. We therefore want our conformal procedure to adaptively provide wider coverage for the ``harder'' observations. This notion of \textit{adaptivity} led to the development of conformal scores and procedures which produce adaptively sized prediction sets \autocite{angelopoulosUncertaintySetsImage2022,romanoClassificationValidAdaptive2020}. We defer further discussion to \ref*{sec:application}, where we provide an in-depth example in the setting of text classification.
+
+One way to think about adaptivity is that if it worked perfectly, it would actually amount to a much stronger coverage guarantee: \textit{conditional coverage}. The original coverage guarantee can be thought of as \textit{marginal coverage}, where we achieved coverage on average over all the data. Conditional coverage would be a guarantee that we achieve coverage conditional on the input. Formally, conditional coverage requires
+\[ \P(Y_{\text{test}} \in C(X_{\text{test}}) | X_{\text{test}}) \geq 1 - \alpha \]
+Unfortunately, conditional coverage is actually impossible to achieve in the most general case --\ there are certain requirements for the sample size and desired error tolerance, as well as properties of the underlying distribution \cite{vovkConditionalValidityInductive2012,barberLimitsDistributionfreeConditional2021}. Further work has developed some theory and various metrics to evaluate conditional coverage \autocite{angelopoulosUncertaintySetsImage2022,cauchoisKnowingWhatYou2021,feldmanImprovingConditionalCoverage2021}.
+
+\subsection{Group-balancing and fairness}
+\label{sec:fairness}
+A related topic that has garnered substantial recent attention is subgroup fairness in machine learning \autocite{dengFIFAMakingFairness2022,FairnessCriminalJustice,kearnsPreventingFairnessGerrymandering2018}. There are actually many possible notions of fairness, but for the task at hand we are interested in conditional coverage guarantees for each subgroup (this is similar to controlling type II error within groups in some of the fairness literature). While general conditional coverage cannot be achieved, this special case is feasible as proved by \textcite{vovkConditionalValidityInductive2012}. Consider a dataset with groups $g = \{ 1, \ldots, G \}$, and let the first feature of every feature vector be the group label. We express the coverage guarantee as:
+\[ \P(Y_{\text{test}} \in C(X_{\text{test}}) | X_{\text{test},1} = g) \geq 1 - \alpha \]
+To accomodate this we compute the conformal scores as usual for each observation, but then we compute the quantiles of the scores for each group separately. That is,
+\[ \hat{q}_g = \frac{\lceil (n_g+1)(1-\alpha) \rceil }{n_g} ~\text{quantile of}~\{ s(X_i, Y_i) : X_{i,1} = g \} \]
+Then the prediction set for a new observation $X_{\text{test}}$ is:
+\[ \hat{C}(X_{\text{test}}) = \left\{ y: s(X_{\text{test}}, y) \leq \hat{q}_{X_{\text{test},1}} \right\} \]
+This procedure achieves the desired conditional coverage guarantee.
+
+A closely related problem for classification problems is ensuring coverage conditional on the label. That is,
+\[ \P(Y_{\text{test}} \in C(X_{\text{test}}) | Y_{\text{test}} = y) \geq 1 - \alpha \]
+for all $y \in \mathcal{Y}$. This is harder because we do not have access to the labels at test, but the solution is quite similar. We again compute the quantiles of the scores for each label $k$ separately, and then the prediction set for a new observation $X_{\text{test}}$ is:
+\[ \hat{C}(X_{\text{test}}) = \left\{ y: s(X_{\text{test}}, y) \leq \hat{q}_{y} \right\} \]
+The key difference is that because we don't know the true class at test time, the quantile $\hat{q}_y$ is different for each provisional label $y$. So, the scores for each provisional label are compared against different thresholds.
+
+\subsection{More general notions of risk}
+We briefly note that some work has been done to extend conformal prediction to more general notions of risk control, including controlling for multiple risk functions \autocite{angelopoulosLearnThenTest2022,batesDistributionfreeRiskcontrollingPrediction2021}. We will not go into detail here as it requires developing substantial notation and theory for a topic that is a bit outside of the scope of this report, but this is a recent advent in the conformal prediction literature that is a promising direction for future work.
 
 \section{Application: Conformal Prediction for Text Classification}
 \label{sec:application}
-In this section, we will provide a case study of how conformal prediction can be used to obtain
-prediction sets with rigorous coverage guarantees for text classification with a large language model (LLM). We will compare the procedure with a naive conformal to a score which is adaptive to the difficulty of each observation, and show that the adaptive score can lead to smaller prediction sets while preserving valid coverage.
+The following case study demonstrates how conformal prediction can be used to obtain prediction sets with rigorous coverage guarantees for text classification with a large language model (LLM). We compare the procedure with a naive conformal score to a score which is adaptive to the difficulty of each observation, and show that the adaptive score can lead to smaller prediction sets while preserving valid coverage.
 
 \paragraph*{Model.} We classify text with the transformer-based language model BART \autocite{lewisBARTDenoisingSequencetoSequence2019},
 finetuned on the Multi-Genre Natural Language Inference (MNLI) categorized text corpus \footnote{\url{https://huggingface.co/datasets/multi_nli}},
@@ -301,7 +341,7 @@ We will see that this model results in prediction sets which are fairly large, a
 
 \paragraph*{Data.} Our prediction task is to classify text from a new data source, a Kaggle dataset of text documents belonging to 5 new categories\footnote{\url{https://www.kaggle.com/datasets/sunilthite/text-document-classification-dataset/data}}. These categories -- Politics, Sport, Technology, Entertainment, and Business -- are mostly nonoverlapping with the categories in the MNLI corpus. The one exception being Politics, which is similar to the Government genre in MNLI -- we will see that this category is, unsurprisingly, the easiest to classify. Of course, BART's original training data surely contained text related to all of these genres (which is why we expect it have enough knowledge to be capable of zero-shot classification), but it was not specifically trained to classify them. We split this Kaggle dataset, using half the data for calibration and the other half for testing.
 
-\paragraph*{Code} All the code for this project is available at \url{https://github.com/jrudoler/rudoler-stat9700-conformal}. This includes the code for language model inference, conformal prediction, and the code used to generate the figures in this report. We use the HuggingFace implementation of \texttt{bart-large-mnli}\footnote{\url{https://huggingface.co/facebook/bart-large-mnli}}, and set up a zero-shot text classification pipeline with the \texttt{transformers} library \autocite{wolfHuggingFaceTransformersStateoftheart2019}.
+\paragraph*{Code} All the code for this project is available at \url{https://github.com/jrudoler/rudoler-stat9700-conformal}. This includes the code for language model inference, conformal prediction, and generating the figures in this report. We use the HuggingFace implementation of \texttt{bart-large-mnli}\footnote{\url{https://huggingface.co/facebook/bart-large-mnli}}, and set up a zero-shot text classification pipeline with the \texttt{transformers} library \autocite{wolfHuggingFaceTransformersStateoftheart2019}.
 
 \paragraph{Conformal scores}
 We will compare two different choices of score function $s$ for the conformal prediction procedure:
@@ -310,52 +350,62 @@ We will compare two different choices of score function $s$ for the conformal pr
     \item \textbf{Adaptive}: We consider the predicted probability of all labels simultaneously in computing the score. Specifically we reorder the labels by descending probability, such that $\hat{f}(X)_{(1)}$ is the most likely label, $\hat{f}(X)_{(2)}$ is the second most likely label, and so on. We define $k$ such that $\hat{f}(X)_{(k)} = y$, and compute the score: \[ s(X, y) = \sum_{j=1}^{k} \hat{f}(X)_{(j)} \] Basically, we add up the predicted probabilities of all the labels in descending order up to and including the true label, $y$.
 \end{enumerate}
 
-\textcite{angelopoulosUncertaintySetsImage2022} discuss adaptive prediction sets in detail in the context of image classification, and introduce the adaptive score function we use here.
+\textcite{romanoClassificationValidAdaptive2020} introduce the adaptive score function we use here, and \textcite{angelopoulosUncertaintySetsImage2022} propose a regularized version and discuss adaptive prediction sets in detail in the context of image classification.
 
-\paragraph*{Results} We evaluate the prediction sets produced via conformal prediction with each of the two score functions described above. Figure \ref{fig:coverage} shows the overall coverage of the prediction sets for each score function, as well as the conditional coverage for each category. Figure \ref{fig:set_size} shows the average size of the prediction sets for each score function, again both overall and for each category.
+Lastly, we also implement the class-conditional conformal method described in~\ref{sec:fairness} to ensure approximate conditional coverage for each label. We still use the adaptive score function, but we compute the quantiles of the scores for each label separately.
 
+\paragraph*{Results} We evaluate the prediction sets produced via conformal prediction with each of the two score functions described above, and with the conformal procedure which stratifies scores by class label (text category). Figure \ref{fig:coverage} shows the overall coverage of the prediction sets for each approach, as well as the conditional coverage for each category. Figure \ref{fig:set_size} shows the average size of the prediction sets for each score function, again both overall and for each category.
 
+The adaptive score function does seem to adapt the size of its prediction sets to ensure that the hardest categories are covered more often. Notice that the ``Entertainment'' category was initially undercovered, but the adaptive procedure assigns larger prediction sets to this category and ensures coverage. It actually seems to overcompensate a bit, as the ``Entertainment'' category is now overcovered while previously covered categories are now undercovered. The advantage of adapting to the complex distribution of data is that we maintain marginal coverage while shrinking the average size of the prediction sets, as shown in Figure \ref{fig:set_size}. This is a critical gain, as smaller predictions sets are fundamentally more useful in practice.
 
+One qualification is that these prediction set sizes, overall, are still quite large. This is probably because, as mentioned above, we employ a relatively lightweight model. Consequently, the heuristic uncertainty estimates (the model's predicted label probabilities) are not as accurate as they could be. We expect that a more powerful model would achieve smaller prediction sets.
 
-
-
+The last important result is that as expected, neither score function alone achieves conditional coverage for each category. However, the class-conditional conformal procedure improves the conditional coverage dramatically and achieves approximate coverage.
 
 
 % include vertically stacked subfigures for coverage
 \begin{figure}[ht]
     \centering
-    \begin{subfigure}[b]{0.8\linewidth}
+    \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width=\linewidth]{figures/nonadaptive_conditional_coverage.pdf}
         \caption{Nonadaptive conformal prediction}
         \label{fig:nonadaptive_coverage}
     \end{subfigure}
-    \begin{subfigure}[b]{0.8\linewidth}
+    \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width=\linewidth]{figures/adaptive_conditional_coverage.pdf}
         \caption{Adaptive conformal prediction}
         \label{fig:adaptive_coverage}
     \end{subfigure}
-    \caption{Comparison of coverage for nonadaptive and adaptive conformal prediction for text classification. Both procedures have marginal coverage guarantees of $1-\alpha$. }
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[width=\linewidth]{figures/labelwise_conditional_coverage.pdf}
+        \caption{Adaptive conformal prediction with class-conditional coverage}
+        \label{fig:labelwise_coverage}
+    \end{subfigure}
+    \caption{Comparison of coverage for nonadaptive and adaptive conformal prediction for text classification. Both procedures have marginal coverage guarantees of $1-\alpha$. Only the class-conditional procedure has approximate conditional coverage for each label.}
     \label{fig:coverage}
 \end{figure}
 
 % include vertically stacked subfigures for set size
 \begin{figure}[ht]
     \centering
-    \begin{subfigure}[b]{0.8\linewidth}
+    \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width=\linewidth]{figures/nonadaptive_set_size.pdf}
         \caption{Nonadaptive conformal prediction}
         \label{fig:nonadaptive_set_size}
     \end{subfigure}
-    \begin{subfigure}[b]{0.8\linewidth}
+    \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width=\linewidth]{figures/adaptive_set_size.pdf}
         \caption{Adaptive conformal prediction}
         \label{fig:adaptive_set_size}
     \end{subfigure}
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[width=\linewidth]{figures/labelwise_set_size.pdf}
+        \caption{Adaptive conformal prediction with class-conditional coverage}
+        \label{fig:labelwise_set_size}
+    \end{subfigure}
     \caption{Comparison of set size for nonadaptive and adaptive conformal prediction for text classification. The adaptive procedure improves coverage for the hardest categories by making their prediction sets larger.}
     \label{fig:set_size}
 \end{figure}
-
-
 
 \newpage
 \printbibliography % print the bibliography

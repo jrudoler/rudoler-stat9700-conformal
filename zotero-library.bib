@@ -259,7 +259,6 @@
   url = {https://doi.org/10.1093/imaiai/iaaa017},
   urldate = {2023-11-20},
   abstract = {We consider the problem of distribution-free predictive inference, with the goal of producing predictive coverage guarantees that hold conditionally rather than marginally. Existing methods such as conformal prediction offer marginal coverage guarantees, where predictive coverage holds on average over all possible test points, but this is not sufficient for many practical applications where we would like to know that our predictions are valid for a given individual, not merely on average over a population. On the other hand, exact conditional inference guarantees are known to be impossible without imposing assumptions on the underlying distribution. In this work, we aim to explore the space in between these two and examine what types of relaxations of the conditional coverage property would alleviate some of the practical concerns with marginal coverage guarantees while still being possible to achieve in a distribution-free setting.},
-  keywords = {unread},
   file = {/Users/jrudoler/Zotero/storage/4TTNSCFK/Foygel Barber et al. - 2021 - The limits of distribution-free conditional predic.pdf;/Users/jrudoler/Zotero/storage/9FNEDYBT/5896927.html}
 }
 
@@ -634,6 +633,17 @@
   file = {/Users/jrudoler/Zotero/storage/HP4YCB83/Casper et al. - 2023 - Open Problems and Fundamental Limitations of Reinf.pdf;/Users/jrudoler/Zotero/storage/3B3GEXMA/2307.html}
 }
 
+@article{cauchoisKnowingWhatYou2021,
+  title = {Knowing What {{You Know}}: Valid and Validated Confidence Sets in Multiclass and Multilabel Prediction},
+  author = {Cauchois, Maxime and Gupta, Suyash and Duchi, John C},
+  date = {2021-03-21},
+  journaltitle = {Journal of Machine Learning Research},
+  abstract = {We develop conformal prediction methods for constructing valid predictive confidence sets in multiclass and multilabel problems without assumptions on the data generating distribution. A challenge here is that typical conformal prediction methods—which give marginal validity (coverage) guarantees—provide uneven coverage, in that they address easy examples at the expense of essentially ignoring difficult examples. By leveraging ideas from quantile regression, we build methods that always guarantee correct coverage but additionally provide (asymptotically consistent) conditional coverage for both multiclass and multilabel prediction problems. To address the potential challenge of exponentially large confidence sets in multilabel prediction, we build tree-structured classifiers that efficiently account for interactions between labels. Our methods can be bolted on top of any classification model—neural network, random forest, boosted tree—to guarantee its validity. We also provide an empirical evaluation, simultaneously providing new validation methods, that suggests the more robust coverage of our confidence sets.},
+  langid = {english},
+  keywords = {unread},
+  file = {/Users/jrudoler/Zotero/storage/YTZ3GEYR/Cauchois et al. - Knowing what You Know valid and validated conﬁden.pdf}
+}
+
 @article{chakrabortyFakeProfileDetection2022,
   title = {Fake {{Profile Detection Using Machine Learning Techniques}}},
   author = {Chakraborty, Partha and Shazan, Mahim Musharof and Nahid, Mahamudul and Ahmed, Md Kaysar and Talukder, Prince Chandra},
@@ -815,6 +825,23 @@
   urldate = {2023-01-04},
   abstract = {Lapses of attention are commonplace, potentially because they are detected too late to be prevented. The authors use real-time fMRI to provide participants continuous access to their attentional state. Real-time feedback, particularly from frontoparietal cortex, improved sustained attention abilities and modified representations in visual cortex and basal ganglia.},
   file = {/Users/jrudoler/Zotero/storage/64HFV42N/deBettencourt et al. - 2015 - Closed-loop training of attention with real-time brain imaging  Nature Neuroscience.pdf}
+}
+
+@online{dengFIFAMakingFairness2022,
+  title = {{{FIFA}}: {{Making Fairness More Generalizable}} in {{Classifiers Trained}} on {{Imbalanced Data}}},
+  shorttitle = {{{FIFA}}},
+  author = {Deng, Zhun and Zhang, Jiayao and Zhang, Linjun and Ye, Ting and Coley, Yates and Su, Weijie J. and Zou, James},
+  date = {2022-06-06},
+  eprint = {2206.02792},
+  eprinttype = {arxiv},
+  eprintclass = {cs, stat},
+  doi = {10.48550/arXiv.2206.02792},
+  url = {http://arxiv.org/abs/2206.02792},
+  urldate = {2023-12-14},
+  abstract = {Algorithmic fairness plays an important role in machine learning and imposing fairness constraints during learning is a common approach. However, many datasets are imbalanced in certain label classes (e.g. "healthy") and sensitive subgroups (e.g. "older patients"). Empirically, this imbalance leads to a lack of generalizability not only of classification, but also of fairness properties, especially in over-parameterized models. For example, fairness-aware training may ensure equalized odds (EO) on the training data, but EO is far from being satisfied on new users. In this paper, we propose a theoretically-principled, yet Flexible approach that is Imbalance-Fairness-Aware (FIFA). Specifically, FIFA encourages both classification and fairness generalization and can be flexibly combined with many existing fair learning methods with logits-based losses. While our main focus is on EO, FIFA can be directly applied to achieve equalized opportunity (EqOpt); and under certain conditions, it can also be applied to other fairness notions. We demonstrate the power of FIFA by combining it with a popular fair classification algorithm, and the resulting algorithm achieves significantly better fairness generalization on several real-world datasets.},
+  pubstate = {preprint},
+  keywords = {unread},
+  file = {/Users/jrudoler/Zotero/storage/METXV73A/Deng et al. - 2022 - FIFA Making Fairness More Generalizable in Classi.pdf;/Users/jrudoler/Zotero/storage/7X8FXCGM/2206.html}
 }
 
 @inproceedings{dengImageNetLargescaleHierarchical2009,
@@ -1012,6 +1039,14 @@
   file = {/Users/jrudoler/Zotero/storage/Y2AZXXIC/Ernst - 2004 - Permutation Methods A Basis for Exact Inference.pdf}
 }
 
+@online{FairnessCriminalJustice,
+  title = {Fairness in {{Criminal Justice Risk Assessments}}: {{The State}} of the {{Art}} - {{Richard Berk}}, {{Hoda Heidari}}, {{Shahin Jabbari}}, {{Michael Kearns}}, {{Aaron Roth}}, 2021},
+  url = {https://journals-sagepub-com.proxy.library.upenn.edu/doi/full/10.1177/0049124118782533},
+  urldate = {2023-12-14},
+  keywords = {unread},
+  file = {/Users/jrudoler/Zotero/storage/WXV5LYL3/0049124118782533.html}
+}
+
 @article{fawcettIntroductionROCAnalysis2006,
   title = {An Introduction to {{ROC}} Analysis},
   author = {Fawcett, Tom},
@@ -1039,6 +1074,22 @@
   abstract = {People can learn rich, general-purpose conceptual representations from only raw perceptual inputs. Current machine learning approaches fall well short of these human standards, although different modeling traditions often have complementary strengths. Symbolic models can capture the compositional and causal knowledge that enables flexible generalization, but they struggle to learn from raw inputs, relying on strong abstractions and simplifying assumptions. Neural network models can learn directly from raw data, but they struggle to capture compositional and causal structure and typically must retrain to tackle new tasks. We bring together these two traditions to learn generative models of concepts that capture rich compositional and causal structure, while learning from raw data. We develop a generative neuro-symbolic (GNS) model of handwritten character concepts that uses the control flow of a probabilistic program, coupled with symbolic stroke primitives and a symbolic image renderer, to represent the causal and compositional processes by which characters are formed. The distributions of parts (strokes), and correlations between parts, are modeled with neural network subroutines, allowing the model to learn directly from raw data and express nonparametric statistical relationships. We apply our model to the Omniglot challenge of human-level concept learning, using a background set of alphabets to learn an expressive prior distribution over character drawings. In a subsequent evaluation, our GNS model uses probabilistic inference to learn rich conceptual representations from a single training image that generalize to 4 unique tasks, succeeding where previous work has fallen short.},
   langid = {english},
   file = {/Users/jrudoler/Zotero/storage/FCSCLTYY/Feinman and Lake - 2021 - LEARNING TASK-GENERAL REPRESENTATIONS WITH GENERAT.pdf}
+}
+
+@online{feldmanImprovingConditionalCoverage2021,
+  title = {Improving {{Conditional Coverage}} via {{Orthogonal Quantile Regression}}},
+  author = {Feldman, Shai and Bates, Stephen and Romano, Yaniv},
+  date = {2021-10-02},
+  eprint = {2106.00394},
+  eprinttype = {arxiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.2106.00394},
+  url = {http://arxiv.org/abs/2106.00394},
+  urldate = {2023-12-14},
+  abstract = {We develop a method to generate prediction intervals that have a user-specified coverage level across all regions of feature-space, a property called conditional coverage. A typical approach to this task is to estimate the conditional quantiles with quantile regression -- it is well-known that this leads to correct coverage in the large-sample limit, although it may not be accurate in finite samples. We find in experiments that traditional quantile regression can have poor conditional coverage. To remedy this, we modify the loss function to promote independence between the size of the intervals and the indicator of a miscoverage event. For the true conditional quantiles, these two quantities are independent (orthogonal), so the modified loss function continues to be valid. Moreover, we empirically show that the modified loss function leads to improved conditional coverage, as evaluated by several metrics. We also introduce two new metrics that check conditional coverage by looking at the strength of the dependence between the interval size and the indicator of miscoverage.},
+  pubstate = {preprint},
+  keywords = {unread},
+  file = {/Users/jrudoler/Zotero/storage/L7SXJSI9/Feldman et al. - 2021 - Improving Conditional Coverage via Orthogonal Quan.pdf;/Users/jrudoler/Zotero/storage/QBT6Z4KG/2106.html}
 }
 
 @book{fisherDesignExperiments1935,
@@ -1129,6 +1180,23 @@
   langid = {english},
   keywords = {eeg,unread},
   file = {/Users/jrudoler/Zotero/storage/6S4ZAUXS/Freeman and Zhai - 2009 - Simulated power spectral density (PSD) of backgrou.pdf}
+}
+
+@online{galDropoutBayesianApproximation2016,
+  title = {Dropout as a {{Bayesian Approximation}}: {{Representing Model Uncertainty}} in {{Deep Learning}}},
+  shorttitle = {Dropout as a {{Bayesian Approximation}}},
+  author = {Gal, Yarin and Ghahramani, Zoubin},
+  date = {2016-10-04},
+  eprint = {1506.02142},
+  eprinttype = {arxiv},
+  eprintclass = {cs, stat},
+  doi = {10.48550/arXiv.1506.02142},
+  url = {http://arxiv.org/abs/1506.02142},
+  urldate = {2023-12-13},
+  abstract = {Deep learning tools have gained tremendous attention in applied machine learning. However such tools for regression and classification do not capture model uncertainty. In comparison, Bayesian models offer a mathematically grounded framework to reason about model uncertainty, but usually come with a prohibitive computational cost. In this paper we develop a new theoretical framework casting dropout training in deep neural networks (NNs) as approximate Bayesian inference in deep Gaussian processes. A direct result of this theory gives us tools to model uncertainty with dropout NNs -- extracting information from existing models that has been thrown away so far. This mitigates the problem of representing uncertainty in deep learning without sacrificing either computational complexity or test accuracy. We perform an extensive study of the properties of dropout's uncertainty. Various network architectures and non-linearities are assessed on tasks of regression and classification, using MNIST as an example. We show a considerable improvement in predictive log-likelihood and RMSE compared to existing state-of-the-art methods, and finish by using dropout's uncertainty in deep reinforcement learning.},
+  pubstate = {preprint},
+  keywords = {unread},
+  file = {/Users/jrudoler/Zotero/storage/ZLXACSXL/Gal and Ghahramani - 2016 - Dropout as a Bayesian Approximation Representing .pdf;/Users/jrudoler/Zotero/storage/EJ2ZJMRU/1506.html}
 }
 
 @article{ganinDomainAdversarialTrainingNeural2016,
@@ -1531,7 +1599,6 @@
   urldate = {2023-12-10},
   abstract = {This article illustrates how indirect or prior information can be optimally used to construct a prediction region that maintains a target frequentist coverage rate. If the indirect information is accurate, the volume of the prediction region is lower on average than that of other regions with the same coverage rate. Even if the indirect information is inaccurate, the resulting region still maintains the target coverage rate. Such a prediction region can be constructed for models that have a complete sufficient statistic, which includes many widely-used parametric and nonparametric models. Particular examples include a Bayes-optimal conformal prediction procedure that maintains a constant coverage rate across distributions in a nonparametric model, as well as a prediction procedure for the normal linear regression model that can utilize a regularizing prior distribution, yet maintain a frequentist coverage rate that is constant as a function of the model parameters and explanatory variables. No results in this article rely on asymptotic approximations.},
   pubstate = {preprint},
-  keywords = {unread},
   file = {/Users/jrudoler/Zotero/storage/9IR3IPT9/Hoff - 2021 - Bayes-optimal prediction with frequentist coverage.pdf;/Users/jrudoler/Zotero/storage/JEY84FZB/2105.html}
 }
 
@@ -1921,6 +1988,23 @@
   file = {/Users/jrudoler/Zotero/storage/D946CT6H/Kaplan et al. - 2020 - Scaling Laws for Neural Language Models.pdf;/Users/jrudoler/Zotero/storage/83YMQPFP/2001.html}
 }
 
+@online{kearnsPreventingFairnessGerrymandering2018,
+  title = {Preventing {{Fairness Gerrymandering}}: {{Auditing}} and {{Learning}} for {{Subgroup Fairness}}},
+  shorttitle = {Preventing {{Fairness Gerrymandering}}},
+  author = {Kearns, Michael and Neel, Seth and Roth, Aaron and Wu, Zhiwei Steven},
+  date = {2018-12-03},
+  eprint = {1711.05144},
+  eprinttype = {arxiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.1711.05144},
+  url = {http://arxiv.org/abs/1711.05144},
+  urldate = {2023-12-14},
+  abstract = {The most prevalent notions of fairness in machine learning are statistical definitions: they fix a small collection of pre-defined groups, and then ask for parity of some statistic of the classifier across these groups. Constraints of this form are susceptible to intentional or inadvertent "fairness gerrymandering", in which a classifier appears to be fair on each individual group, but badly violates the fairness constraint on one or more structured subgroups defined over the protected attributes. We propose instead to demand statistical notions of fairness across exponentially (or infinitely) many subgroups, defined by a structured class of functions over the protected attributes. This interpolates between statistical definitions of fairness and recently proposed individual notions of fairness, but raises several computational challenges. It is no longer clear how to audit a fixed classifier to see if it satisfies such a strong definition of fairness. We prove that the computational problem of auditing subgroup fairness for both equality of false positive rates and statistical parity is equivalent to the problem of weak agnostic learning, which means it is computationally hard in the worst case, even for simple structured subclasses. We then derive two algorithms that provably converge to the best fair classifier, given access to oracles which can solve the agnostic learning problem. The algorithms are based on a formulation of subgroup fairness as a two-player zero-sum game between a Learner and an Auditor. Our first algorithm provably converges in a polynomial number of steps. Our second algorithm enjoys only provably asymptotic convergence, but has the merit of simplicity and faster per-step computation. We implement the simpler algorithm using linear regression as a heuristic oracle, and show that we can effectively both audit and learn fair classifiers on real datasets.},
+  pubstate = {preprint},
+  keywords = {unread},
+  file = {/Users/jrudoler/Zotero/storage/R4WKI92V/Kearns et al. - 2018 - Preventing Fairness Gerrymandering Auditing and L.pdf;/Users/jrudoler/Zotero/storage/K6SGQ5PX/1711.html}
+}
+
 @article{kimMinimaxOptimalityPermutation2022,
   title = {Minimax Optimality of Permutation Tests},
   author = {Kim, Ilmun and Balakrishnan, Sivaraman and Wasserman, Larry},
@@ -2117,7 +2201,7 @@
   url = {https://proceedings.neurips.cc/paper_files/paper/2017/hash/9ef2ed4b7fd2c810847ffa5fa85bce38-Abstract.html},
   urldate = {2023-11-22},
   abstract = {Deep neural networks (NNs) are powerful black box predictors that have recently achieved impressive performance on a wide spectrum of tasks. Quantifying predictive uncertainty in NNs is a challenging and yet unsolved problem.  Bayesian NNs, which learn a distribution over weights, are currently the state-of-the-art for estimating predictive uncertainty; however these require significant modifications to the training procedure and are computationally expensive compared to standard (non-Bayesian)  NNs.  We propose an alternative to Bayesian NNs that is simple to implement, readily parallelizable, requires very little hyperparameter tuning, and yields high quality predictive uncertainty estimates. Through a series of experiments on classification and regression benchmarks, we demonstrate that our method produces well-calibrated uncertainty estimates which are as good or better than approximate Bayesian NNs. To assess robustness to dataset shift, we evaluate the predictive uncertainty on test examples from known and unknown distributions, and show that our method is able to express higher uncertainty on out-of-distribution examples. We demonstrate the scalability of our method by evaluating predictive uncertainty estimates on ImageNet.},
-  keywords = {Ensemble learning to estimate uncertainty,priority},
+  keywords = {Ensemble learning to estimate uncertainty},
   file = {/Users/jrudoler/Zotero/storage/GADZ4FVI/Lakshminarayanan et al. - 2017 - Simple and Scalable Predictive Uncertainty Estimat.pdf}
 }
 
@@ -2497,6 +2581,38 @@
   pubstate = {preprint},
   keywords = {bayes},
   file = {/Users/jrudoler/Zotero/storage/S3EVRVQ6/Lotfi et al. - 2022 - Bayesian Model Selection, the Marginal Likelihood,.pdf;/Users/jrudoler/Zotero/storage/IRE8CABW/2202.html}
+}
+
+@thesis{mackayBayesianMethodsAdaptive1992,
+  type = {phdthesis},
+  title = {Bayesian Methods for Adaptive Models},
+  author = {MacKay, David J. C.},
+  date = {1992},
+  institution = {{California Institute of Technology}},
+  doi = {10.7907/H3A1-WM07},
+  url = {https://resolver.caltech.edu/CaltechETD:etd-01042007-131447},
+  urldate = {2023-12-13},
+  abstract = {The Bayesian framework for model comparison and regularisation is demonstrated by studying interpolation and classification problems modelled with both linear and non-linear models. This framework quantitatively embodies 'Occam's razor'. Over-complex and under-regularised models are automatically inferred to be less probable, even though their flexibility allows them to fit the data better. When applied to 'neural networks', the Bayesian framework makes possible (1) objective comparison of solutions using alternative network architectures; (2) objective stopping rules for network pruning or growing procedures; (3) objective choice of type of weight decay terms (or regularisers); (4) on-line techniques for optimising weight decay (or regularisation constant) magnitude; (5) a measure of the effective number of well-determined parameters in a model; (6) quantified estimates of the error bars on network parameters and on network output. In the case of classification models, it is shown that the careful incorporation of error bar information into a classifier's predictions yields improved performance. Comparisons of the inferences of the Bayesian Framework with more traditional cross-validation methods help detect poor underlying assumptions in learning models. The relationship of the Bayesian learning framework to 'active learning' is examined. Objective functions are discussed which measure the expected informativeness data measurements, in the context of both interpolation and classification problems. The concepts and methods described in this thesis are quite general and will be applicable to other data modelling problems whether they involve regression, classification or density estimation.},
+  langid = {english},
+  file = {/Users/jrudoler/Zotero/storage/J8LWTZLN/MacKay - 1992 - Bayesian methods for adaptive models.pdf;/Users/jrudoler/Zotero/storage/AT32UKZC/25.html}
+}
+
+@article{mackayProbableNetworksPlausible1995a,
+  title = {Probable Networks and Plausible Predictions — a Review of Practical {{Bayesian}} Methods for Supervised Neural Networks},
+  author = {Mackay, David J C},
+  date = {1995-01},
+  journaltitle = {Network: Computation in Neural Systems},
+  shortjournal = {Network: Computation in Neural Systems},
+  volume = {6},
+  number = {3},
+  pages = {469--505},
+  issn = {0954-898X, 1361-6536},
+  doi = {10.1088/0954-898X_6_3_011},
+  url = {https://www.tandfonline.com/doi/full/10.1088/0954-898X_6_3_011},
+  urldate = {2023-12-13},
+  abstract = {Bayesian probability theory provides a unifying framework for data modelling. In this framework the overall aims are to find models that are well-matched to the data, and to use these models to make optimal predictions. Neural network learning is interpreted as an inference of the most probable parameters for the model, given the training data. The search in model space (i.e., the space of architectures, noise models, preprocessings, regularizers and weight decay constants) can then also be treated as an inference problem, in which we infer the relative probability of alternative models, given the data. This review describes practical techniques based on Gaussian approximations for implementation of these powerful methods for controlling, comparing and using adaptive networks.},
+  langid = {english},
+  keywords = {unread}
 }
 
 @article{madoreReadinessRememberPredicting2022,
@@ -3397,7 +3513,6 @@
   url = {https://proceedings.neurips.cc/paper/2020/hash/244edd7e85dc81602b7615cd705545f5-Abstract.html},
   urldate = {2023-11-23},
   abstract = {Conformal inference, cross-validation+, and the jackknife+ are hold-out methods that can be combined with virtually any machine learning algorithm to construct prediction sets with guaranteed marginal coverage. In this paper, we develop specialized versions of these techniques for categorical and unordered response labels that, in addition to providing marginal coverage, are also fully adaptive to complex data distributions, in the sense that they perform favorably in terms of approximate conditional coverage compared to alternative methods. The heart of our contribution is a novel conformity score, which we explicitly demonstrate to be powerful and intuitive for classification problems, but whose underlying principle is potentially far more general. Experiments on synthetic and real data demonstrate the practical value of our theoretical guarantees, as well as the statistical advantages of the proposed methods over the existing alternatives.},
-  keywords = {unread},
   file = {/Users/jrudoler/Zotero/storage/T7H4S6ZW/Romano et al. - 2020 - Classification with Valid and Adaptive Coverage.pdf}
 }
 
@@ -3571,6 +3686,23 @@
   langid = {english},
   keywords = {unread},
   file = {/Users/jrudoler/Zotero/storage/LLJIWZ78/Schneider et al. - 2023 - Learnable latent embeddings for joint behavioural .pdf}
+}
+
+@inproceedings{seedatImprovingAdaptiveConformal2023,
+  title = {Improving {{Adaptive Conformal Prediction Using Self-Supervised Learning}}},
+  booktitle = {Proceedings of {{The}} 26th {{International Conference}} on {{Artificial Intelligence}} and {{Statistics}}},
+  author = {Seedat, Nabeel and Jeffares, Alan and Imrie, Fergus and family=Schaar, given=Mihaela, prefix=van der, useprefix=false},
+  date = {2023-04-11},
+  pages = {10160--10177},
+  publisher = {{PMLR}},
+  issn = {2640-3498},
+  url = {https://proceedings.mlr.press/v206/seedat23a.html},
+  urldate = {2023-12-13},
+  abstract = {Conformal prediction is a powerful distribution-free tool for uncertainty quantification, establishing valid prediction intervals with finite-sample guarantees. To produce valid intervals which are also adaptive to the difficulty of each instance, a common approach is to compute normalized nonconformity scores on a separate calibration set. Self-supervised learning has been effectively utilized in many domains to learn general representations for downstream predictors. However, the use of self-supervision beyond model pretraining and representation learning has been largely unexplored. In this work, we investigate how self-supervised pretext tasks can improve the quality of the conformal regressors, specifically by improving the adaptability of conformal intervals. We train an auxiliary model with a self-supervised pretext task on top of an existing predictive model and use the self-supervised error as an additional feature to estimate nonconformity scores. We empirically demonstrate the benefit of the additional information using both synthetic and real data on the efficiency (width), deficit, and excess of conformal prediction intervals.},
+  eventtitle = {International {{Conference}} on {{Artificial Intelligence}} and {{Statistics}}},
+  langid = {english},
+  keywords = {unread},
+  file = {/Users/jrudoler/Zotero/storage/V4CHU7QV/Seedat et al. - 2023 - Improving Adaptive Conformal Prediction Using Self.pdf}
 }
 
 @article{sextonReassessingHierarchicalCorrespondences2022,
@@ -4181,7 +4313,6 @@
   location = {{Red Hook, NY, USA}},
   abstract = {The key distinguishing property of a Bayesian approach is marginalization, rather than using a single setting of weights. Bayesian marginalization can particularly improve the accuracy and calibration of modern deep neural networks, which are typically underspecified by the data, and can represent many compelling but different solutions. We show that deep ensembles provide an effective mechanism for approximate Bayesian marginalization, and propose a related approach that further improves the predictive distribution by marginalizing within basins of attraction, without significant overhead. We also investigate the prior over functions implied by a vague distribution over neural network weights, explaining the generalization properties of such models from a probabilistic perspective. From this perspective, we explain results that have been presented as mysterious and distinct to neural network generalization, such as the ability to fit images with random labels, and show that these results can be reproduced with Gaussian processes. We also show that Bayesian model averaging alleviates double descent, resulting in monotonic performance improvements with increased flexibility.},
   isbn = {978-1-71382-954-6},
-  keywords = {unread},
   file = {/Users/jrudoler/Zotero/storage/L4H2DN4U/Wilson and Izmailov - 2020 - Bayesian deep learning and a probabilistic perspec.pdf}
 }
 
